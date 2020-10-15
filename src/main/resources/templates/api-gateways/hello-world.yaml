@@ -1,0 +1,14 @@
+openapi: 3.0.0
+info:
+  title: Sample API
+  version: 1.0.0
+paths:
+  /:
+    get:
+      x-yc-apigateway-integration:
+        type: dummy
+        content:
+          '*': "Hello, World!"
+        http_code: 200
+        http_headers:
+          Content-Type: "text/plain"

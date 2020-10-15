@@ -1,0 +1,52 @@
+<idea-plugin>
+    <id>yandex.cloud-toolkit</id>
+    <name>Yandex.Cloud Toolkit</name>
+    <vendor email="cloud-opensource@yandex-team.ru" url="https://cloud.yandex.ru/">Yandex.Cloud</vendor>
+
+    <description></description>
+
+    <!-- please see https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+         on how to target different products -->
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Add your extensions here -->
+        <applicationService serviceInterface="yandex.cloud.toolkit.api.auth.CloudAuthService"
+                            serviceImplementation="yandex.cloud.toolkit.api.auth.impl.CloudAuthServiceImpl"/>
+
+        <applicationService serviceInterface="yandex.cloud.toolkit.api.profile.CloudProfileService"
+                            serviceImplementation="yandex.cloud.toolkit.api.profile.impl.CloudProfileServiceImpl"/>
+
+        <applicationService serviceInterface="yandex.cloud.toolkit.api.auth.CloudOAuthService"
+                            serviceImplementation="yandex.cloud.toolkit.api.auth.impl.oauth.CloudOAuthServiceImpl"/>
+
+        <applicationService serviceInterface="yandex.cloud.toolkit.api.resource.CloudResourceStorage"
+                            serviceImplementation="yandex.cloud.toolkit.api.resource.impl.CloudResourceStorageImpl"/>
+
+        <applicationService serviceInterface="yandex.cloud.toolkit.api.service.CloudRepository"
+                            serviceImplementation="yandex.cloud.toolkit.api.service.impl.CloudRepositoryImpl"/>
+
+        <applicationService serviceInterface="yandex.cloud.toolkit.api.service.CloudOperationTracker"
+                            serviceImplementation="yandex.cloud.toolkit.api.service.impl.CloudOperationTrackerImpl"/>
+
+        <applicationService serviceInterface="yandex.cloud.toolkit.api.service.CloudOperationService"
+                            serviceImplementation="yandex.cloud.toolkit.api.service.impl.CloudOperationServiceImpl"/>
+
+        <toolWindow id="Yandex.Cloud" anchor="left" icon="CloudIcons.Icons.CloudExplorer" secondary="true"
+                    doNotActivateOnStart="true"
+                    factoryClass="yandex.cloud.toolkit.ui.explorer.CloudExplorerWindowFactory"
+                    order="after Structure"/>
+
+        <configurationType implementation="yandex.cloud.toolkit.configuration.function.deploy.DeployFunctionConfigurationType"/>
+        <configurationType implementation="yandex.cloud.toolkit.configuration.apigateway.deploy.DeployApiGatewayConfigurationType"/>
+        <configurationType implementation="yandex.cloud.toolkit.configuration.function.run.RunFunctionConfigurationType"/>
+    </extensions>
+
+    <actions>
+        <!-- Add your actions here -->
+    </actions>
+
+    <applicationListeners>
+        <listener class="yandex.cloud.toolkit.listener.StartupListener" topic="com.intellij.ide.AppLifecycleListener"/>
+    </applicationListeners>
+</idea-plugin>

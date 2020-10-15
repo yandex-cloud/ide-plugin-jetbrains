@@ -1,0 +1,59 @@
+name: deploy
+
+on:
+  push:
+    branches:
+      - 'deploy'
+
+jobs:
+  build:
+    name: Build and upload plugin
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Java 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      - name: Fetch plugin version
+        id: print_version
+        uses: eskatos/gradle-command-action@v1
+        with:
+          arguments: printVersion
+
+      - name: Extract changes
+        id: changelog_reader
+        uses: mindsers/changelog-reader-action@v2
+        with:
+          version: ${{ steps.print_version.outputs.plugin-version }}
+          path: ./CHANGELOG.md
+
+      - name: Build plugin
+        uses: eskatos/gradle-command-action@v1
+        with:
+          arguments: buildPlugin
+
+      - name: Build plugin repository
+        uses: eskatos/gradle-command-action@v1
+        with:
+          arguments: buildPluginRepository
+
+      - name: Release plugin
+        uses: ncipollo/release-action@v1
+        with:
+          tag: v${{ steps.print_version.outputs.plugin-version }}
+          artifacts: "./build/libs/yandex-cloud-toolkit-${{ steps.print_version.outputs.plugin-version }}.jar"
+          body: ${{ steps.changelog_reader.outputs.changes }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          allowUpdates: true
+
+      - name: Release plugin repository
+        uses: ncipollo/release-action@v1
+        with:
+          tag: "latest"
+          artifacts: "./build/updatePlugins.xml"
+          bodyFile: "./CHANGELOG.md"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          allowUpdates: true

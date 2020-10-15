@@ -1,0 +1,78 @@
+syntax = "proto3";
+
+package yandex.cloud.api.tools;
+
+import "google/protobuf/descriptor.proto";
+
+option go_package = "tools";
+option (cloud.api.tools.file).lint_skip.java_package = true;
+
+extend google.protobuf.FileOptions {FileOptions file = 67321;}
+extend google.protobuf.MessageOptions {MessageOptions message = 67321;}
+extend google.protobuf.FieldOptions {FieldOptions field = 67321;}
+extend google.protobuf.EnumOptions {EnumOptions enumeration = 67321;}
+extend google.protobuf.EnumValueOptions {EnumValueOptions value = 67321;}
+extend google.protobuf.ServiceOptions {ServiceOptions service = 67321;}
+extend google.protobuf.MethodOptions {MethodOptions method = 67321;}
+
+message FileOptions {
+  FileLintSkip lint_skip = 1;
+}
+
+message FileLintSkip {
+  bool all = 1;
+  bool go_package = 2;
+  bool file_path = 3;
+  bool java_package = 4;
+}
+
+message MessageOptions {
+  CommonLintSkip lint_skip = 1;
+}
+
+message FieldOptions {
+  repeated string one_of = 1;
+  FieldLintSkip lint_skip = 2;
+}
+
+message FieldLintSkip {
+  bool all = 1;
+  bool int_type = 2;
+  bool float_type = 3;
+}
+
+message EnumOptions {
+  EnumLintSkip lint_skip = 2;
+}
+
+message EnumLintSkip {
+  bool all = 1;
+  bool value_names_case = 2;
+  bool unspecified_value = 3;
+}
+
+message EnumValueOptions {
+  CommonLintSkip lint_skip = 1;
+}
+
+message ServiceOptions {
+  CommonLintSkip lint_skip = 1;
+  bool skip_generate = 2;
+}
+
+message MethodOptions {
+  MethodLintSkip lint_skip = 1;
+  bool skip_generate = 2;
+}
+
+message MethodLintSkip {
+  bool all = 1;
+  bool contains_resource_name = 2;
+  bool http_query_parameters = 3;
+  bool http_path = 4;
+  bool http_verb = 5;
+}
+
+message CommonLintSkip {
+  bool all = 1;
+}

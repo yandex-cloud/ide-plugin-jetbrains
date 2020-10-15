@@ -1,0 +1,115 @@
+buildscript {
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.kordamp.gradle:markdown-gradle-plugin:2.2.0'
+    }
+}
+
+plugins {
+    id 'org.jetbrains.intellij' version '0.5.0'
+    id 'org.jetbrains.kotlin.jvm' version '1.4.10'
+    id 'com.github.johnrengelman.shadow' version '6.1.0'
+    id 'com.google.protobuf' version '0.8.14'
+    id 'org.kordamp.gradle.markdown' version '2.2.0'
+}
+
+group 'ru.yandex'
+version pluginVersion
+
+allprojects {
+    repositories {
+        mavenCentral()
+    }
+}
+
+buildSearchableOptions.enabled = false
+
+dependencies {
+    implementation "com.yandex.cloud:java-sdk-services:$YC_SDK_VERSION"
+    implementation "com.yandex.cloud:java-sdk-functions:$YC_SDK_VERSION"
+    implementation "com.yandex.cloud:java-sdk-auth:$YC_SDK_VERSION"
+
+    implementation "com.google.protobuf:protobuf-java:$PROTOBUF_VERSION"
+}
+
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = '1.8'
+
+        freeCompilerArgs += [
+                // This flag is required due to the current implementation using
+                // the coroutine builder [CoroutineScope.actor]. This can be removed
+                // once the coroutines stdlib is updated with a suitable replacement
+                "-Xuse-experimental=kotlinx.coroutines.ObsoleteCoroutinesApi"
+        ]
+    }
+}
+
+jar {
+    archiveClassifier.set('raw')
+}
+
+shadowJar {
+    archiveClassifier.set(null)
+    mergeServiceFiles()
+}
+
+protobuf {
+    protoc { artifact = "com.google.protobuf:protoc:$PROTOBUF_VERSION" }
+    plugins {
+        grpc { artifact = "io.grpc:protoc-gen-grpc-java:$GRPC_VERSION" }
+    }
+    generateProtoTasks {
+        all()*.plugins { grpc {} }
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs 'build/generated/source/proto/main/grpc'
+            srcDirs 'build/generated/source/proto/main/java'
+        }
+    }
+}
+
+// See https://github.com/JetBrains/gradle-intellij-plugin/
+intellij {
+    version ideaVersion
+}
+
+patchPluginXml {
+    sinceBuild minIDEVersion
+    untilBuild null
+
+    copy {
+        from 'CHANGELOG.md'
+        into "build/changelogs"
+    }
+
+    markdownToHtml {
+        sourceDir file("build/changelogs")
+        outputDir file("build/changelogs")
+    }.runTask()
+
+    pluginDescription(file(descriptionFile).text)
+    changeNotes(file("build/changelogs/CHANGELOG.html").text)
+}
+
+task printVersion {
+    doLast {
+        logger.lifecycle("::set-output name=plugin-version::" + project.version)
+    }
+}
+
+buildPlugin.dependsOn(shadowJar)
+
+task buildPluginRepository(type: Copy) {
+    from './resources/pluginRepository.xml'
+    into buildDir
+    rename { "updatePlugins.xml" }
+    expand("version": version, "sincebuild": minIDEVersion)
+}

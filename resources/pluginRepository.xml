@@ -1,0 +1,6 @@
+<plugins>
+    <plugin id="yandex.cloud-toolkit" url="https://github.com/yandex-cloud/ide-plugin-jetbrains/releases/download/v${version}/yandex-cloud-toolkit-${version}.jar" version="${version}">
+        <idea-version since-build="${sincebuild}"/>
+        <name>Yandex.Cloud Toolkit</name>
+    </plugin>
+</plugins>

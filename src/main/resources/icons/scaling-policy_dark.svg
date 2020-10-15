@@ -1,0 +1,8 @@
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <g fill="#B0B1B3" fill-rule="evenodd">
+        <path d="M7.37843 9.37843L6.67132 8.67133L4.17132 11.1713L2 9.00001V14H7L4.87843 11.8784L7.37843 9.37843Z"/>
+        <path d="M8.67157 6.67159L9.37868 7.37869L11.8787 4.87869L14 7.00001V2.00001H9L11.1716 4.17159L8.67157 6.67159Z"/>
+        <polygon points="8 10.5 10.5 13 5.5 13" transform="matrix(1 0 0 -1 0 21)"/>
+        <polygon points="8 5.5 10.5 8 5.5 8"/>
+    </g>
+</svg>
