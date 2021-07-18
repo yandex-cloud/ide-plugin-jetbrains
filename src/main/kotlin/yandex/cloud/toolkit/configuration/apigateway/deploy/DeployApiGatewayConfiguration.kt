@@ -19,7 +19,7 @@ class DeployApiGatewayConfiguration(name: String?, factory: ConfigurationFactory
     RunConfigurationMinimalBase<ApiGatewayDeploySpec>(name, factory, project) {
 
     override fun clone() = DeployApiGatewayConfiguration(name, factory, project).apply {
-        loadState(this@DeployApiGatewayConfiguration.state)
+        state.copyFrom(this@DeployApiGatewayConfiguration.state)
     }
 
     override fun getConfigurationEditor(): SettingsEditor<out RunConfiguration> =
