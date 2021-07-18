@@ -91,10 +91,7 @@ class FunctionScalingPoliciesDialog(
 
     override fun createCenterPanel(): JComponent {
         return YCUI.borderPanel {
-            LabeledComponent.create(
-                CloudResourceField(project, function),
-                "Function", BorderLayout.WEST
-            ) addAs BorderLayout.NORTH
+            CloudResourceField(project, function).labeled("Function") addAs BorderLayout.NORTH
 
             ToolbarDecorator.createDecorator(policyTree).apply {
                 setToolbarPosition(ActionToolbarPosition.RIGHT)

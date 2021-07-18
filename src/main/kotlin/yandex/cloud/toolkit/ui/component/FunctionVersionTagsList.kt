@@ -13,7 +13,6 @@ import yandex.cloud.toolkit.api.resource.impl.model.findWithTag
 import yandex.cloud.toolkit.ui.action.CopyToBufferAction
 import yandex.cloud.toolkit.util.*
 import java.awt.BorderLayout
-import javax.swing.JLabel
 import javax.swing.JList
 import javax.swing.SwingConstants
 
@@ -96,10 +95,10 @@ class FunctionVersionTagsList(
             setOkActionEnabled(false)
 
             centerPanel(
+
                 YCUI.gridPanel {
                     YCUI.gridBag(horizontal = true) {
-                        JLabel("Tag") addAs nextln(0.2)
-                        valueField addAs next(0.8)
+                        valueField.labeled("Tag") addAs fullLine()
                         statusLabel addAs fullLine()
                     }
                 }.withPreferredWidth(350)

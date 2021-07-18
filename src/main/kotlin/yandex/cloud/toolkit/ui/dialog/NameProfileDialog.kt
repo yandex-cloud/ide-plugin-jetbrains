@@ -40,7 +40,7 @@ class NameProfileDialog(
                     asFocusable(false)
                 } addAs fullLine()
             }
-            nameField.withPreferredWidth(400) addAs fullLine()
+            nameField.labeled("Profile Name").withPreferredWidth(400) addAs fullLine()
         }
     }
 

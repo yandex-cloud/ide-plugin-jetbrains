@@ -142,7 +142,7 @@ class CreateOrEditApiGatewayDialog(
         secondComponent = YCUI.borderPanel {
             YCUI.separator("Specification") addAs BorderLayout.NORTH
             specEditor addAs BorderLayout.CENTER
-            LabeledComponent.create(templateBox, "Template", BorderLayout.WEST) addAs BorderLayout.SOUTH
+            templateBox.labeled("Template") addAs BorderLayout.SOUTH
         }.withPreferredWidth(480)
     }
 
