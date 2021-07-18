@@ -33,7 +33,7 @@ import javax.swing.Action
 import javax.swing.JComponent
 import javax.swing.JList
 
-class ManageProfilesDialog(val project: Project) : DialogWrapper(true) {
+class ManageProfilesDialog(val project: Project) : DialogWrapper(project, true) {
 
     private val profilesListModel = CollectionListModel<CloudProfile>()
     private val profilesList = JBList(profilesListModel)
@@ -78,7 +78,7 @@ class ManageProfilesDialog(val project: Project) : DialogWrapper(true) {
 
             setEditAction {
                 val selectedProfile = profilesList.singleSelectedValue ?: return@setEditAction
-                NameProfileDialog(selectedProfile, true, selectedProfile::rename).showAndGet()
+                NameProfileDialog(project, selectedProfile, true, selectedProfile::rename).showAndGet()
             }
 
             setRemoveAction {
@@ -118,7 +118,7 @@ class ManageProfilesDialog(val project: Project) : DialogWrapper(true) {
                 )
             }
             is JustValue -> {
-                val isNamed = NameProfileDialog(profile, false, profile::rename).showAndGet()
+                val isNamed = NameProfileDialog(project, profile, false, profile::rename).showAndGet()
                 if (isNamed) {
                     profilesListModel.add(profile)
                     val profileIndex = profilesListModel.size - 1
