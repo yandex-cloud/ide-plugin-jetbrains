@@ -22,7 +22,7 @@ class RunFunctionConfiguration(name: String?, factory: ConfigurationFactory, pro
     RunConfigurationMinimalBase<FunctionRunSpec>(name, factory, project) {
 
     override fun clone() = RunFunctionConfiguration(name, factory, project).apply {
-        loadState(this@RunFunctionConfiguration.state)
+        state.copyFrom(this@RunFunctionConfiguration.state)
     }
 
     override fun getConfigurationEditor(): SettingsEditor<out RunConfiguration> =

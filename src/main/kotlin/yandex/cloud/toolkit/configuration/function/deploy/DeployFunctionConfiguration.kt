@@ -12,6 +12,7 @@ import com.intellij.openapi.components.BaseState
 import com.intellij.openapi.options.SettingsEditor
 import com.intellij.openapi.project.Project
 import yandex.cloud.api.serverless.functions.v1.FunctionOuterClass
+import yandex.cloud.toolkit.api.resource.impl.model.CloudFunctionVersion
 import yandex.cloud.toolkit.process.FunctionDeployProcess
 import yandex.cloud.toolkit.process.RunContentController
 import yandex.cloud.toolkit.util.logger
@@ -20,7 +21,7 @@ class DeployFunctionConfiguration(name: String?, factory: ConfigurationFactory, 
     RunConfigurationMinimalBase<FunctionDeploySpec>(name, factory, project) {
 
     override fun clone() = DeployFunctionConfiguration(name, factory, project).apply {
-        loadState(this@DeployFunctionConfiguration.state)
+        state.copyFrom(this@DeployFunctionConfiguration.state)
     }
 
     override fun getConfigurationEditor(): SettingsEditor<out RunConfiguration> =
@@ -96,7 +97,7 @@ class FunctionDeploySpec : BaseState() {
             envVariables = template.environmentMap
             memoryBytes = template.resources.memory
             serviceAccountId = template.serviceAccountId
-            tags = template.tagsList
+            tags = template.tagsList.filterTo(mutableListOf()) { it != CloudFunctionVersion.LATEST_TAG }
         }
     }
 }

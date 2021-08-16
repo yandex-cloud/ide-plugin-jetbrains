@@ -6,6 +6,7 @@ import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.colors.EditorColorsScheme
 import com.intellij.openapi.editor.ex.EditorEx
 import com.intellij.openapi.ui.ComboBox
+import com.intellij.openapi.ui.LabeledComponent
 import com.intellij.openapi.util.Disposer
 import com.intellij.ui.*
 import com.intellij.ui.components.JBBox
@@ -14,6 +15,7 @@ import com.intellij.ui.components.fields.IntegerField
 import com.intellij.util.ui.GridBag
 import com.intellij.util.ui.UIUtil
 import java.awt.*
+import java.awt.event.ItemEvent
 import javax.swing.*
 import javax.swing.event.PopupMenuEvent
 import javax.swing.event.PopupMenuListener
@@ -106,6 +108,9 @@ fun ToolbarDecorator.clearActions() {
     setEditAction(null)
 }
 
+fun <C : JComponent> C.labeled(label: String, location: String = BorderLayout.WEST): LabeledComponent<C> =
+    LabeledComponent.create(this, label, location)
+
 fun JTree.getTreePath(x: Int, y: Int): TreePath? {
     val path: TreePath = getClosestPathForLocation(x, y) ?: return null
     val bounds: Rectangle? = getPathBounds(path)
@@ -131,6 +136,12 @@ fun <E> ComboBox<E>.doOnFirstExpansion(action: () -> Unit) {
         override fun popupMenuWillBecomeInvisible(e: PopupMenuEvent) {}
         override fun popupMenuCanceled(e: PopupMenuEvent) {}
     })
+}
+
+fun <E> ComboBox<E>.doOnItemChange(action: (ItemEvent) -> Unit) {
+    this.addItemListener {
+        if (it.stateChange == ItemEvent.SELECTED) action(it)
+    }
 }
 
 object YCUI {

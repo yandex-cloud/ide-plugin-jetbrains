@@ -283,7 +283,7 @@ class RunFunctionDialog(
     }
 
     private fun setupLogsTrackingSpoiler() {
-        tagBox.addActionListener {
+        tagBox.doOnItemChange {
             destroyLogsTrackingPanel()
             setupLogsTrackingPanel()
         }

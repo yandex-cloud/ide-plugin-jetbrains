@@ -83,7 +83,7 @@ class FunctionDeployDialog(
             invokeLater {
                 val configuration = configuration.clone()
                 editor.applyTo(configuration)
-                SaveConfigurationDialog(project, editor.snapshot).show()
+                SaveConfigurationDialog(project, configuration).show()
             }
         }
     }

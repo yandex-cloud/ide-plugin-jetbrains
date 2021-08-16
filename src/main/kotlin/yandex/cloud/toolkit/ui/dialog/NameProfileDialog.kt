@@ -1,5 +1,6 @@
 package yandex.cloud.toolkit.ui.dialog
 
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.openapi.ui.ValidationInfo
 import com.intellij.ui.components.JBTextField
@@ -7,8 +8,12 @@ import yandex.cloud.toolkit.api.profile.CloudProfile
 import yandex.cloud.toolkit.util.*
 import javax.swing.JComponent
 
-class NameProfileDialog(val profile: CloudProfile, val isRename: Boolean, val nameCallback: (String) -> Unit) :
-    DialogWrapper(true) {
+class NameProfileDialog(
+    val project: Project,
+    val profile: CloudProfile,
+    val isRename: Boolean,
+    val nameCallback: (String) -> Unit
+) : DialogWrapper(project, true) {
 
     private val nameField = JBTextField()
 
@@ -35,7 +40,7 @@ class NameProfileDialog(val profile: CloudProfile, val isRename: Boolean, val na
                     asFocusable(false)
                 } addAs fullLine()
             }
-            nameField.withPreferredWidth(400) addAs fullLine()
+            nameField.labeled("Profile Name").withPreferredWidth(400) addAs fullLine()
         }
     }
 
