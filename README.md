@@ -4,7 +4,7 @@
 ## Возможности
 * [Resource Manager](https://cloud.yandex.ru/docs/resource-manager/): Просмотр и управление ресурсами Yandex.Cloud 
 * [Cloud Functions](https://cloud.yandex.ru/docs/functions/): Менеджмент функций, деплой версий, удаленный запуск, просмотр логов.
-* [API Gateways](https://cloud.yandex.ru/docs/api-gateway/): Менеджмент PI-шлюзов, просмотр и обновление спецификации.
+* [API Gateways](https://cloud.yandex.ru/docs/api-gateway/): Менеджмент API-шлюзов, просмотр и обновление спецификации.
 * [Service Accounts](https://cloud.yandex.ru/docs/iam/concepts/users/service-accounts): Менеджмент сервисных аккаунтов, назначение ролей.
 
 ## Поддерживаемые IDE
