@@ -38,7 +38,7 @@ class CloudOperationServiceImpl : CloudOperationService {
         private const val CONNECTION_TIMEOUT = 60 * 100
         private const val SOCKET_TIMEOUT = 300 * 1000
 
-        private val FUNCTION_INVOCATION_LINK = "https://functions.yandexcloud.net/"
+        private val DEFAULT_FUNCTION_INVOKE_URL = "https://functions.yandexcloud.net/"
         private val BACKGROUND_TASK_TITLE = "Yandex.Cloud"
     }
 
@@ -82,8 +82,8 @@ class CloudOperationServiceImpl : CloudOperationService {
         }
     }
 
-    override fun getFunctionInvocationLink(functionId: String): String =
-        FUNCTION_INVOCATION_LINK + functionId
+    override fun getDefaultFunctionInvokeUrl(functionId: String): String =
+        DEFAULT_FUNCTION_INVOKE_URL + functionId
 
     override fun runFunction(
         project: Project,
@@ -92,8 +92,7 @@ class CloudOperationServiceImpl : CloudOperationService {
     ): AsyncHttpRequest<SimpleHttpResponse> {
         val future = CompletableFuture<SimpleHttpResponse>()
 
-        val invocationLink = getFunctionInvocationLink(functionId)
-        val url = URIBuilder(invocationLink).apply {
+        val url = URIBuilder(request.invokeUrl).apply {
             setParameter("integration", "raw")
             setParameter("tag", request.versionTag)
         }.build()

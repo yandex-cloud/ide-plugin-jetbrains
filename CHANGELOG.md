@@ -1,7 +1,12 @@
 # Changelog
 
+## [1.1.0]
+### Improved
+- Now auth profile can read endpoint from CLI profile
+- Now invocation URL can be resolved for authorized function run requests
+
 ## [1.0.1]
-### Fixes
+### Fixed
 - Fix tag selection box in Run Function Dialog
 - Fix some field labels
 - Move Name Profile Dialog to project level

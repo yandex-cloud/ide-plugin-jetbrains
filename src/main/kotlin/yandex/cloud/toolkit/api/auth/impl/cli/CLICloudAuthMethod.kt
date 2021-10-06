@@ -3,16 +3,15 @@ package yandex.cloud.toolkit.api.auth.impl.cli
 import com.intellij.openapi.application.invokeLater
 import com.intellij.openapi.project.Project
 import icons.CloudIcons
+import org.apache.commons.io.IOUtils
 import org.apache.commons.lang3.SystemUtils
 import yandex.cloud.toolkit.api.auth.CloudAuthData
 import yandex.cloud.toolkit.api.auth.CloudAuthMethod
 import yandex.cloud.toolkit.api.auth.CloudAuthMethodDescriptor
 import yandex.cloud.toolkit.ui.dialog.CLIAuthConfigDialog
-import yandex.cloud.toolkit.util.Maybe
-import yandex.cloud.toolkit.util.NoValue
-import yandex.cloud.toolkit.util.just
-import yandex.cloud.toolkit.util.noResource
+import yandex.cloud.toolkit.util.*
 import yandex.cloud.toolkit.util.remote.resource.PresentableResourceStatus
+import java.time.Duration
 import java.util.concurrent.CancellationException
 
 class CLICloudAuthMethod : CloudAuthMethod {
@@ -71,7 +70,46 @@ class CLICloudAuthMethod : CloudAuthMethod {
         val config = this.config ?: return noResource(
             "Missing CLI location", PresentableResourceStatus.ProfileCorrupted
         )
-        return just(CloudAuthData.byCLI(this, config))
+        return resolveEndpoint(config).tryMap { endpoint ->
+            CloudAuthData.byCLI(
+                this,
+                config,
+                endpoint ?: CloudAuthData.DEFAULT_ENDPOINT
+            )
+        }
+    }
+
+    private fun resolveEndpoint(config: Config): Maybe<String?> {
+        val cliLocation = config.cliLocation
+        if (cliLocation.isEmpty()) return just(null)
+
+        val args = mutableListOf(cliLocation, "config", "get", "endpoint")
+        if (config.profile != null) {
+            args += "--profile"
+            args += config.profile
+        }
+
+        val process = try {
+            Runtime.getRuntime().exec(args.toTypedArray())
+        } catch (e: Exception) {
+            return noResource("Failed to extract API endpoint from profile: " + e.message)
+        }
+
+        val cliOutput = process.withTimeout(Duration.ofSeconds(3)) { IOUtils.toString(inputStream, Charsets.UTF_8) }
+
+        return when {
+            cliOutput.isNullOrEmpty() -> {
+                val error = IOUtils.toString(process.errorStream, Charsets.UTF_8)
+                when {
+                    error.isNullOrEmpty() -> just(null)
+                    else -> noResource(
+                        "Failed to extract API endpoint from profile\n$cliOutput",
+                        PresentableResourceStatus.Unresolved
+                    )
+                }
+            }
+            else -> just(cliOutput.trim())
+        }
     }
 
     data class Config(val cliLocation: String, val profile: String?) {

@@ -115,7 +115,7 @@ class RunFunctionDialog(
         val input = inputField.text
         val tag = tagBox.selectedTag!!
 
-        val runRequest = FunctionRunRequest(authData, tag, input)
+        val runRequest = FunctionRunRequest(authData, function.data.httpInvokeUrl, tag, input)
         val httpRequest = CloudOperationService.instance.runFunction(project, function.id, runRequest)
         task = RunTask(httpRequest, System.currentTimeMillis())
     }

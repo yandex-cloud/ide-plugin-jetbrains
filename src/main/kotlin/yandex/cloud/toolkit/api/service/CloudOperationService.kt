@@ -30,7 +30,7 @@ interface CloudOperationService {
         request: FunctionRunRequest
     ): AsyncHttpRequest<SimpleHttpResponse>
 
-    fun getFunctionInvocationLink(functionId: String): String
+    fun getDefaultFunctionInvokeUrl(functionId: String): String
 
     fun fetchFunction(project: Project, folder: CloudFolder, functionId: String): LazyTask<CloudFunction>
 
