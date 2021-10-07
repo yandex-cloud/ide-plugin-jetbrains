@@ -38,15 +38,28 @@ class FunctionRunProcess(
             val functionId = spec.functionId ?: ""
             val requestId = UUID.randomUUID()
             val traceId = UUID.randomUUID()
-            val invocationLink = CloudOperationService.instance.getFunctionInvocationLink(functionId)
-            val versionTag = spec.versionTag.nullize() ?: CloudFunctionVersion.LATEST_TAG
-
-            logger.println("Invocation Link: $invocationLink")
-            logger.println("Request Authorized: " + spec.authorizeRequest)
 
             val profile = project.profileStorage.profile
             val authData = profile?.getAuthData(toUse = true)
             if (spec.authorizeRequest && authData == null) steps.notAuthenticatedError()
+
+            val invokeUrl =  if (spec.authorizeRequest) {
+                val function = CloudOperationService.instance.fetchFunction(
+                    project,
+                    profile!!.resourceUser.dummyFolder,
+                    functionId
+                ) onFail steps.handleError()
+
+                logger.println("Function Name: ${function.name}")
+                function.data.httpInvokeUrl
+            } else {
+                CloudOperationService.instance.getDefaultFunctionInvokeUrl(functionId)
+            }
+
+            val versionTag = spec.versionTag.nullize() ?: CloudFunctionVersion.LATEST_TAG
+
+            logger.println("Invocation URL: $invokeUrl")
+            logger.println("Request Authorized: " + spec.authorizeRequest)
 
             logger.println("Request ID: $requestId")
             logger.println("Trace ID: $traceId")
@@ -66,6 +79,7 @@ class FunctionRunProcess(
                 requestId,
                 traceId,
                 if (spec.authorizeRequest) authData?.iamToken else null,
+                invokeUrl,
                 versionTag,
                 spec.request ?: ""
             )
@@ -136,13 +150,15 @@ class FunctionRunRequest(
     val requestId: UUID,
     val traceId: UUID,
     val iamToken: String?,
+    var invokeUrl: String,
     val versionTag: String,
     val body: String
 ) {
-    constructor(authData: CloudAuthData, versionTag: String, body: String) : this(
+    constructor(authData: CloudAuthData, invokeUrl: String, versionTag: String, body: String) : this(
         UUID.randomUUID(),
         UUID.randomUUID(),
         authData.iamToken,
+        invokeUrl,
         versionTag,
         body
     )

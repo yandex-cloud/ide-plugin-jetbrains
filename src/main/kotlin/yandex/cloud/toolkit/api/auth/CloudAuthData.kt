@@ -28,8 +28,10 @@ data class CloudAuthData(
                 " IntelliJ." + PlatformUtils.getPlatformPrefix() + "/" +
                 PluginManagerCore.getPlugin(PluginManagerCore.CORE_ID)?.version
 
-        private fun byCredentials(authMethod: CloudAuthMethod, credentials: CredentialProvider): CloudAuthData {
-            val channelFactory = ChannelFactory(ChannelFactory.DEFAULT_ENDPOINT, USER_AGENT)
+        const val DEFAULT_ENDPOINT = ChannelFactory.DEFAULT_ENDPOINT
+
+        private fun byCredentials(authMethod: CloudAuthMethod, endpoint: String, credentials: CredentialProvider): CloudAuthData {
+            val channelFactory = ChannelFactory(endpoint, USER_AGENT)
             val serviceFactory = ServiceFactory.builder()
                 .credentialProvider(credentials)
                 .channelFactory(channelFactory)
@@ -45,17 +47,17 @@ data class CloudAuthData(
                 .enableCache()
                 .build()
 
-            return byCredentials(authMethod, credentials)
+            return byCredentials(authMethod, DEFAULT_ENDPOINT, credentials)
         }
 
-        fun byCLI(authMethod: CLICloudAuthMethod, config: CLICloudAuthMethod.Config): CloudAuthData {
+        fun byCLI(authMethod: CLICloudAuthMethod, config: CLICloudAuthMethod.Config, endpoint: String): CloudAuthData {
             val credentials = cliAuthBuilder()
                 .cliLocation(config.cliLocation)
                 .profile(config.profile)
                 .enableCache()
                 .build()
 
-            return byCredentials(authMethod, credentials)
+            return byCredentials(authMethod, endpoint, credentials)
         }
     }
 }
