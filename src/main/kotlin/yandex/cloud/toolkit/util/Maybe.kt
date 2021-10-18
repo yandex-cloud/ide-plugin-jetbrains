@@ -3,7 +3,7 @@ package yandex.cloud.toolkit.util
 import yandex.cloud.toolkit.util.remote.resource.PresentableResourceStatus
 import yandex.cloud.toolkit.util.remote.resource.ResourceLoadingError
 
-sealed class Maybe<R>
+sealed class Maybe<out R>
 
 class JustValue<R>(val value: R) : Maybe<R>()
 class NoValue<R>(val error: Throwable) : Maybe<R>()

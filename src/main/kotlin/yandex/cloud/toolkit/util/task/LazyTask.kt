@@ -2,11 +2,14 @@ package yandex.cloud.toolkit.util.task
 
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.openapi.vfs.VirtualFile
-import yandex.cloud.toolkit.util.*
+import yandex.cloud.toolkit.util.Maybe
+import yandex.cloud.toolkit.util.NoValue
+import yandex.cloud.toolkit.util.doMaybe
+import yandex.cloud.toolkit.util.orElse
 import java.io.File
 import java.io.FileNotFoundException
 
-class LazyTask<R>(private val taskName: String, action: () -> Maybe<R>) : TaskAction<R>(action) {
+class LazyTask<out R>(private val taskName: String, action: () -> Maybe<R>) : TaskAction<R>(action) {
 
     private var errorMessage: (Throwable) -> String = { it.message ?: "" }
 
@@ -15,7 +18,7 @@ class LazyTask<R>(private val taskName: String, action: () -> Maybe<R>) : TaskAc
         notifyOnFail(errorMessage)
     }
 
-    infix fun performIn(context: TaskContext): Maybe<R> = context.run {
+    infix fun performIn(context: TaskContext): Maybe<out R> = context.run {
         text = taskName
         val result = handle()
         if (result is NoValue) {

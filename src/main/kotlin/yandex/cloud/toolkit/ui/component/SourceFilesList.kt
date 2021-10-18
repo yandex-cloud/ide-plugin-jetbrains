@@ -13,11 +13,14 @@ import com.intellij.ui.ColoredListCellRenderer
 import com.intellij.ui.SimpleTextAttributes
 import com.intellij.ui.ToolbarDecorator
 import com.intellij.ui.components.JBList
-import yandex.cloud.toolkit.util.*
-import java.awt.GridBagLayout
+import yandex.cloud.toolkit.util.YCPanel
+import yandex.cloud.toolkit.util.YCUI
+import yandex.cloud.toolkit.util.setItems
+import yandex.cloud.toolkit.util.withPreferredHeight
+import java.awt.BorderLayout
 import javax.swing.JList
 
-class SourceFilesList(val project: Project) : YCPanel(GridBagLayout()) {
+class SourceFilesList(val project: Project) : YCPanel(BorderLayout()) {
 
     private val listModel = CollectionListModel<SourceFile>()
     private val list = JBList(listModel)
@@ -34,32 +37,31 @@ class SourceFilesList(val project: Project) : YCPanel(GridBagLayout()) {
     init {
         list.setEmptyText("No source files selected")
         list.cellRenderer = ListRenderer()
+        withPreferredHeight(110)
 
-        YCUI.gridBag(horizontal = true) {
-            YCUI.separator("Source Files") addAs fullLine()
+        YCUI.separator("Source Files") addAs BorderLayout.NORTH
 
-            ToolbarDecorator.createDecorator(list).apply {
-                setToolbarPosition(ActionToolbarPosition.BOTTOM)
-                setMoveDownAction(null)
-                setMoveUpAction(null)
-                setAddAction {
-                    val descriptor = FileChooserDescriptor(
-                        true,
-                        true,
-                        false,
-                        false,
-                        false,
-                        true
-                    )
+        ToolbarDecorator.createDecorator(list).apply {
+            setToolbarPosition(ActionToolbarPosition.BOTTOM)
+            setMoveDownAction(null)
+            setMoveUpAction(null)
+            setAddAction {
+                val descriptor = FileChooserDescriptor(
+                    true,
+                    true,
+                    false,
+                    false,
+                    false,
+                    true
+                )
 
-                    FileChooser.chooseFiles(
-                        descriptor, project, null
-                    ) { files ->
-                        listModel.add(files.map { SourceFile(it.path, it) })
-                    }
+                FileChooser.chooseFiles(
+                    descriptor, project, null
+                ) { files ->
+                    listModel.add(files.map { SourceFile(it.path, it) })
                 }
-            }.createPanel().withPreferredHeight(110) addAs fullLine()
-        }
+            }
+        }.createPanel() addAs BorderLayout.CENTER
     }
 
     private class ListRenderer : ColoredListCellRenderer<SourceFile>() {

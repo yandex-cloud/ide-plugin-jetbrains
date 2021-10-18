@@ -8,11 +8,12 @@ import com.intellij.util.ui.JBUI
 import yandex.cloud.toolkit.api.resource.findById
 import yandex.cloud.toolkit.api.resource.impl.HierarchicalCloudResource
 import yandex.cloud.toolkit.api.resource.impl.icon
-import yandex.cloud.toolkit.util.*
+import yandex.cloud.toolkit.util.YCPanel
+import yandex.cloud.toolkit.util.YCUI
 import java.awt.BorderLayout
 import javax.swing.Icon
 
-class CloudResourceField(
+class CloudResourceLabel(
     val project: Project,
     val resources: List<HierarchicalCloudResource>?,
     val defaultIcon: Icon?,

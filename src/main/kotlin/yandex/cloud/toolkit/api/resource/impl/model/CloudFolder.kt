@@ -8,6 +8,7 @@ import yandex.cloud.api.access.Access
 import yandex.cloud.api.resourcemanager.v1.FolderOuterClass
 import yandex.cloud.toolkit.api.explorer.getNode
 import yandex.cloud.toolkit.api.resource.CloudDependency
+import yandex.cloud.toolkit.api.resource.CloudDependencyLoadingResult
 import yandex.cloud.toolkit.api.resource.CloudResourcePath
 import yandex.cloud.toolkit.api.resource.impl.CloudResourceDescriptor
 import yandex.cloud.toolkit.api.resource.impl.FolderAccessBindingsLoader
@@ -30,13 +31,15 @@ abstract class CloudFolder : HierarchicalCloudResource() {
     val gatewayGroup = CloudGatewayGroup(this)
     val triggerGroup = CloudTriggerGroup(this)
     val serviceAccountGroup = CloudServiceAccountGroup(this)
+    val networkGroup = VPCNetworkGroup(this)
 
     private val groups: List<HierarchicalCloudResource>
         get() = listOf(
             functionGroup,
             gatewayGroup,
             triggerGroup,
-            serviceAccountGroup
+            serviceAccountGroup,
+            networkGroup
         )
 
     override fun getChildNodes(context: CloudExplorerContext): List<SimpleNode> =
@@ -96,6 +99,7 @@ abstract class CloudFolder : HierarchicalCloudResource() {
     object TriggerGroup : CloudDependency<CloudFolder, CloudTriggerGroup>()
     object GatewayGroup : CloudDependency<CloudFolder, CloudGatewayGroup>()
     object ServiceAccountGroup : CloudDependency<CloudFolder, CloudServiceAccountGroup>()
+    object NetworkGroup : CloudDependency<CloudFolder, VPCNetworkGroup>()
     object AccessBindings : CloudDependency<CloudFolder, List<Access.AccessBinding>>()
 
     object Descriptor : CloudResourceDescriptor(
@@ -116,6 +120,14 @@ class HierarchicalCloudFolder(
     override val fullName: String get() = "$cloud/$name"
 
     override fun getPath(innerPath: CloudResourcePath?): CloudResourcePath = cloud.getChildPath(this, innerPath)
+
+    fun addDependencies(deps: CloudDependencyLoadingResult) {
+        deps.put(this, FunctionGroup, functionGroup)
+        deps.put(this, GatewayGroup, gatewayGroup)
+        deps.put(this, TriggerGroup, triggerGroup)
+        deps.put(this, ServiceAccountGroup, serviceAccountGroup)
+        deps.put(this, NetworkGroup, networkGroup)
+    }
 }
 
 class VirtualCloudFolder(val user: CloudUser, override val id: String) : CloudFolder() {

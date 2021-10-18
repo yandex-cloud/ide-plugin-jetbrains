@@ -6,8 +6,10 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.ui.components.JBLabel
 import yandex.cloud.toolkit.api.resource.impl.model.CloudApiGateway
-import yandex.cloud.toolkit.ui.component.*
-import yandex.cloud.toolkit.util.*
+import yandex.cloud.toolkit.ui.component.CloudResourceLabel
+import yandex.cloud.toolkit.util.YCUI
+import yandex.cloud.toolkit.util.next
+import yandex.cloud.toolkit.util.nextln
 import javax.swing.JComponent
 
 class DeployApiGatewayConfigurationEditor(
@@ -15,7 +17,7 @@ class DeployApiGatewayConfigurationEditor(
     target: CloudApiGateway?
 ) : SettingsEditor<DeployApiGatewayConfiguration>() {
 
-    private val apiGatewayField = CloudResourceField(project, target, CloudApiGateway.Descriptor.icon)
+    private val apiGatewayField = CloudResourceLabel(project, target, CloudApiGateway.Descriptor.icon)
     private val specFileField = TextFieldWithBrowseButton()
 
     init {

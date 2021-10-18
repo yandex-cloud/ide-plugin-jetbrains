@@ -11,6 +11,7 @@ import com.intellij.openapi.application.invokeLater
 import com.intellij.openapi.components.BaseState
 import com.intellij.openapi.options.SettingsEditor
 import com.intellij.openapi.project.Project
+import com.intellij.util.text.nullize
 import yandex.cloud.api.serverless.functions.v1.FunctionOuterClass
 import yandex.cloud.toolkit.api.resource.impl.model.CloudFunctionVersion
 import yandex.cloud.toolkit.process.FunctionDeployProcess
@@ -25,7 +26,7 @@ class DeployFunctionConfiguration(name: String?, factory: ConfigurationFactory, 
     }
 
     override fun getConfigurationEditor(): SettingsEditor<out RunConfiguration> =
-        DeployFunctionConfigurationEditor(project, null, null, null, null)
+        DeployFunctionConfigurationEditor(project, null, null, null, null, null)
 
     override fun getState(executor: Executor, environment: ExecutionEnvironment): RunProfileState {
         if (state.functionId.isNullOrEmpty()) {
@@ -77,6 +78,11 @@ class FunctionDeploySpec : BaseState() {
     var serviceAccountId by string()
     var envVariables by map<String, String>()
     var tags by list<String>()
+    var networkId by string()
+    var useSubnets by property(false)
+    var subnets by list<String>()
+
+    fun hasConnectivity(): Boolean = if (useSubnets) subnets.isNotEmpty() else !networkId.isNullOrEmpty()
 
     companion object {
 
@@ -98,6 +104,11 @@ class FunctionDeploySpec : BaseState() {
             memoryBytes = template.resources.memory
             serviceAccountId = template.serviceAccountId
             tags = template.tagsList.filterTo(mutableListOf()) { it != CloudFunctionVersion.LATEST_TAG }
+            networkId = template.connectivity.networkId.nullize()
+            if (template.connectivity.subnetIdCount > 0) {
+                useSubnets = networkId.isNullOrEmpty()
+                subnets = template.connectivity.subnetIdList
+            }
         }
     }
 }

@@ -12,6 +12,8 @@ import yandex.cloud.api.resourcemanager.v1.FolderOuterClass
 import yandex.cloud.api.serverless.apigateway.v1.Apigateway
 import yandex.cloud.api.serverless.functions.v1.FunctionOuterClass
 import yandex.cloud.api.serverless.triggers.v1.TriggerOuterClass
+import yandex.cloud.api.vpc.v1.NetworkOuterClass
+import yandex.cloud.api.vpc.v1.SubnetOuterClass
 import yandex.cloud.toolkit.api.auth.CloudAuthData
 import yandex.cloud.toolkit.api.resource.impl.model.*
 import yandex.cloud.toolkit.configuration.function.deploy.FunctionDeploySpec
@@ -176,6 +178,24 @@ interface CloudRepository {
     ): CloudOperation
 
     fun deleteFunction(authData: CloudAuthData, functionId: String): CloudOperation
+
+    fun getNetworkList(
+        authData: CloudAuthData,
+        folderId: String,
+        pointer: RemoteListPointer
+    ): RemoteList<NetworkOuterClass.Network>
+
+    fun getSubnetList(
+        authData: CloudAuthData,
+        networkId: String,
+        pointer: RemoteListPointer
+    ): RemoteList<SubnetOuterClass.Subnet>
+
+    fun getFolderSubnets(
+        authData: CloudAuthData,
+        folderId: String,
+        pointer: RemoteListPointer
+    ): RemoteList<SubnetOuterClass.Subnet>
 
     companion object {
         val instance: CloudRepository get() = ServiceManager.getService(CloudRepository::class.java)

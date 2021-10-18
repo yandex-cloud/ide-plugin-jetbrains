@@ -27,6 +27,8 @@ import yandex.cloud.toolkit.process.FunctionRunRequest
 import yandex.cloud.toolkit.util.*
 import yandex.cloud.toolkit.util.remote.list.RemoteList
 import yandex.cloud.toolkit.util.remote.list.RemoteListPointer
+import yandex.cloud.toolkit.util.remote.list.loadRemoteList
+import yandex.cloud.toolkit.util.remote.resource.UnauthenticatedException
 import yandex.cloud.toolkit.util.task.*
 import java.util.*
 import java.util.concurrent.CompletableFuture
@@ -263,6 +265,26 @@ class CloudOperationServiceImpl : CloudOperationService {
             "Failed to fetch cloud functions of folder '$folder'"
         }
 
+    override fun fetchVPCNetworks(project: Project, folder: CloudFolder) =
+        folder.networkGroup.getOrLoad(
+            VPCNetworkGroup.Networks,
+            project,
+            if (folder.isVirtual) "Fetching networks" else "Fetching '$folder' networks"
+        ) {
+            VPCNetworksLoader
+        } onError {
+            "Failed to fetch networks of folder '$folder'"
+        }
+
+    override fun fetchFolderSubnets(user: CloudUser, folderId: String) = doLazy("Fetching subnets...") {
+        val authData = user.authData ?: throw UnauthenticatedException()
+        loadRemoteList {
+            CloudRepository.instance.getFolderSubnets(authData, folderId, it)
+        }.mapValue { it.sortedBy { subnet -> subnet.name } }
+    } onError {
+        "Failed to fetch subnets of folder '$folderId'"
+    }
+
     override fun fetchRuntimes(project: Project, user: CloudUser) =
         user.getOrLoad(CloudUser.AvailableRuntimes, project, "Fetching available runtimes") {
             AvailableRuntimesLoader
@@ -380,8 +402,20 @@ class CloudOperationServiceImpl : CloudOperationService {
             text = "Updating function scaling policies..."
 
             val operations = mutableListOf<CloudOperation>()
-            operations += removedPolicies.map { CloudRepository.instance.removeFunctionScalingPolicy(authData, function.id, it.tag) }
-            operations += changedPolicies.map { CloudRepository.instance.setFunctionScalingPolicy(authData, function.id, it) }
+            operations += removedPolicies.map {
+                CloudRepository.instance.removeFunctionScalingPolicy(
+                    authData,
+                    function.id,
+                    it.tag
+                )
+            }
+            operations += changedPolicies.map {
+                CloudRepository.instance.setFunctionScalingPolicy(
+                    authData,
+                    function.id,
+                    it
+                )
+            }
 
             val operationResults = operations.awaitEnd(project, authData)
 

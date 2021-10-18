@@ -4,7 +4,7 @@ import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.project.Project
 import yandex.cloud.api.access.Access
 import yandex.cloud.api.iam.v1.RoleOuterClass
-import yandex.cloud.api.serverless.functions.v1.FunctionOuterClass
+import yandex.cloud.api.vpc.v1.SubnetOuterClass
 import yandex.cloud.toolkit.api.auth.CloudAuthData
 import yandex.cloud.toolkit.api.resource.impl.model.*
 import yandex.cloud.toolkit.api.util.LogLine
@@ -48,6 +48,8 @@ interface CloudOperationService {
 
     fun fetchRoles(project: Project, user: CloudUser): LazyTask<List<RoleOuterClass.Role>>
 
+    fun fetchVPCNetworks(project: Project, folder: CloudFolder): LazyTask<List<VPCNetwork>>
+
     fun fetchFolderAccessBindings(project: Project, folder: CloudFolder): LazyTask<List<Access.AccessBinding>>
 
     /**
@@ -62,6 +64,8 @@ interface CloudOperationService {
         toSecondsEx: Long,
         pointer: RemoteListPointer
     ): LazyTask<RemoteList<LogLine>>
+
+    fun fetchFolderSubnets(user: CloudUser, folderId: String): LazyTask<List<SubnetOuterClass.Subnet>>
 
     fun setFunctionVersionTags(
         project: Project,

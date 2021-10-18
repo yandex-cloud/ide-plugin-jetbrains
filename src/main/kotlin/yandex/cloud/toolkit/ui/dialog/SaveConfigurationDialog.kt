@@ -35,6 +35,7 @@ class SaveConfigurationDialog(val project: Project, val configuration: RunConfig
 
         setOkOperation {
             val runManager = RunManagerImpl.getInstanceImpl(project)
+            configuration.name = nameField.text
             val settings = RunnerAndConfigurationSettingsImpl(
                 runManager,
                 configuration,

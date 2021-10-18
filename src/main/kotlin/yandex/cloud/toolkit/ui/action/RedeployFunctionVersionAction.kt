@@ -13,8 +13,8 @@ import yandex.cloud.toolkit.api.resource.impl.user
 import yandex.cloud.toolkit.api.service.CloudOperationService
 import yandex.cloud.toolkit.configuration.function.deploy.DeployFunctionConfiguration
 import yandex.cloud.toolkit.ui.dialog.FunctionDeployDialog
-import yandex.cloud.toolkit.util.task.backgroundTask
 import yandex.cloud.toolkit.util.showAuthenticationNotification
+import yandex.cloud.toolkit.util.task.backgroundTask
 
 class RedeployFunctionVersionAction(var project: Project, val function: CloudFunction, val versionId: String) :
     DumbAwareAction("Redeploy", null, AllIcons.Actions.Upload) {
@@ -33,6 +33,7 @@ class RedeployFunctionVersionAction(var project: Project, val function: CloudFun
             val versions by CloudOperationService.instance.fetchFunctionVersions(project, function)
             val serviceAccounts by CloudOperationService.instance.fetchServiceAccounts(project, function.group.folder)
             val runtimes by CloudOperationService.instance.fetchRuntimes(project, function.user)
+            val networks by CloudOperationService.instance.fetchVPCNetworks(project, function.group.folder)
 
             val templateVersion: FunctionOuterClass.Version? = versions.findById(versionId)?.data
             val configuration = DeployFunctionConfiguration.createTemplateConfiguration(project, templateVersion)
@@ -44,6 +45,7 @@ class RedeployFunctionVersionAction(var project: Project, val function: CloudFun
                     function,
                     versions,
                     serviceAccounts,
+                    networks,
                     runtimes,
                     configuration,
                     useTemplateTags = true

@@ -13,7 +13,7 @@ import com.intellij.ui.components.JBTextField
 import com.intellij.util.text.nullize
 import yandex.cloud.toolkit.api.resource.impl.model.CloudFunction
 import yandex.cloud.toolkit.api.resource.impl.model.CloudFunctionVersion
-import yandex.cloud.toolkit.ui.component.CloudResourceField
+import yandex.cloud.toolkit.ui.component.CloudResourceLabel
 import yandex.cloud.toolkit.util.*
 import javax.swing.JComponent
 
@@ -22,7 +22,7 @@ class RunFunctionConfigurationEditor(
     target: CloudFunction?
 ) : SettingsEditor<RunFunctionConfiguration>() {
 
-    private val functionField = CloudResourceField(project, target, CloudFunction.Descriptor.icon)
+    private val functionField = CloudResourceLabel(project, target, CloudFunction.Descriptor.icon)
     private val versionTagField = JBTextField()
     private val authorizeRequestCheckbox = JBCheckBox("Authorize Request")
     private val showRequestCheckbox = JBCheckBox("Show Request")
