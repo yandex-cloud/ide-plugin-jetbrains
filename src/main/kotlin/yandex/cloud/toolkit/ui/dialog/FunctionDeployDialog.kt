@@ -10,9 +10,11 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.openapi.ui.ValidationInfo
 import yandex.cloud.toolkit.api.auth.CloudAuthData
-import yandex.cloud.toolkit.api.resource.impl.model.*
+import yandex.cloud.toolkit.api.resource.impl.model.CloudFunction
+import yandex.cloud.toolkit.api.resource.impl.model.latestVersion
 import yandex.cloud.toolkit.configuration.function.deploy.DeployFunctionConfiguration
 import yandex.cloud.toolkit.configuration.function.deploy.DeployFunctionConfigurationEditor
+import yandex.cloud.toolkit.configuration.function.deploy.FunctionDeployResources
 import yandex.cloud.toolkit.util.disposeWith
 import yandex.cloud.toolkit.util.text
 import yandex.cloud.toolkit.util.withPreferredWidth
@@ -24,19 +26,16 @@ class FunctionDeployDialog(
     val project: Project,
     val authData: CloudAuthData,
     val function: CloudFunction,
-    val versions: List<CloudFunctionVersion>,
-    val serviceAccounts: List<CloudServiceAccount>,
-    networks: List<VPCNetwork>,
-    runtimes: List<String>,
+    val resources: FunctionDeployResources,
     templateConfiguration: DeployFunctionConfiguration?,
     useTemplateTags: Boolean,
 ) : DialogWrapper(true) {
 
-    private val editor = DeployFunctionConfigurationEditor(project, function, versions, serviceAccounts, networks, runtimes)
+    private val editor = DeployFunctionConfigurationEditor(project, function, resources)
     private val saveConfigurationAction = SaveConfigurationAction()
 
     private val configuration: DeployFunctionConfiguration = templateConfiguration?.clone()
-        ?: DeployFunctionConfiguration.createTemplateConfiguration(project, versions.latestVersion?.data)
+        ?: DeployFunctionConfiguration.createTemplateConfiguration(project, resources.versions?.latestVersion?.data)
 
     init {
         if (!useTemplateTags) configuration.state.tags.clear()
@@ -45,6 +44,7 @@ class FunctionDeployDialog(
         okAction.text = "Deploy"
 
         editor.disposeWith(myDisposable)
+
         init()
         title = "Deploy Yandex.Cloud Function"
     }

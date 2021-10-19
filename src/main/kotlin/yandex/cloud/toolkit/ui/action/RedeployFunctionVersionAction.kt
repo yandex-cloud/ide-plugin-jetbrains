@@ -12,6 +12,7 @@ import yandex.cloud.toolkit.api.resource.impl.model.CloudFunction
 import yandex.cloud.toolkit.api.resource.impl.user
 import yandex.cloud.toolkit.api.service.CloudOperationService
 import yandex.cloud.toolkit.configuration.function.deploy.DeployFunctionConfiguration
+import yandex.cloud.toolkit.configuration.function.deploy.FunctionDeployResources
 import yandex.cloud.toolkit.ui.dialog.FunctionDeployDialog
 import yandex.cloud.toolkit.util.showAuthenticationNotification
 import yandex.cloud.toolkit.util.task.backgroundTask
@@ -43,10 +44,12 @@ class RedeployFunctionVersionAction(var project: Project, val function: CloudFun
                     project,
                     authData,
                     function,
-                    versions,
-                    serviceAccounts,
-                    networks,
-                    runtimes,
+                    FunctionDeployResources(
+                        versions,
+                        serviceAccounts,
+                        networks,
+                        runtimes
+                    ),
                     configuration,
                     useTemplateTags = true
                 ).show()

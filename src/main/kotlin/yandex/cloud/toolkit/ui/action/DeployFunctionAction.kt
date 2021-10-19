@@ -15,6 +15,7 @@ import yandex.cloud.toolkit.api.resource.impl.user
 import yandex.cloud.toolkit.api.service.CloudOperationService
 import yandex.cloud.toolkit.configuration.function.deploy.DeployFunctionConfiguration
 import yandex.cloud.toolkit.configuration.function.deploy.DeployFunctionConfigurationType
+import yandex.cloud.toolkit.configuration.function.deploy.FunctionDeployResources
 import yandex.cloud.toolkit.ui.dialog.FunctionDeployDialog
 import yandex.cloud.toolkit.util.showAuthenticationNotification
 import yandex.cloud.toolkit.util.task.backgroundTask
@@ -92,10 +93,12 @@ class DeployFunctionAction(val project: Project, val function: CloudFunction) : 
                     project,
                     authData,
                     function,
-                    versions,
-                    serviceAccounts,
-                    networks,
-                    runtimes,
+                    FunctionDeployResources(
+                        versions,
+                        serviceAccounts,
+                        networks,
+                        runtimes,
+                    ),
                     template,
                     useTemplateTags = false
                 ).show()
