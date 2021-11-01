@@ -115,6 +115,11 @@ class CloudResourceStatusTags(tags: List<String>) : SimpleResourceStatus(
     SimpleTextAttributes(SimpleTextAttributes.STYLE_SMALLER, JBColor.GRAY)
 )
 
+class CloudResourceStatusZone(zoneId: String) : SimpleResourceStatus(
+    zoneId,
+    SimpleTextAttributes(SimpleTextAttributes.STYLE_SMALLER, JBColor.GRAY)
+)
+
 operator fun PresentableResourceStatus?.plus(other: PresentableResourceStatus?): PresentableResourceStatus? = when {
     this == null -> other
     other == null -> this

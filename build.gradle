@@ -86,17 +86,17 @@ patchPluginXml {
     untilBuild null
 
     copy {
-        from 'CHANGELOG.md'
-        into "build/changelogs"
+        from changesFile
+        into "build/changelog"
     }
 
     markdownToHtml {
-        sourceDir file("build/changelogs")
-        outputDir file("build/changelogs")
+        sourceDir file("build/changelog")
+        outputDir file("build/changelog")
     }.runTask()
 
     pluginDescription(file(descriptionFile).text)
-    changeNotes(file("build/changelogs/CHANGELOG.html").text)
+    changeNotes(file("build/changelog/CHANGELOG.html").text)
 }
 
 task printVersion {

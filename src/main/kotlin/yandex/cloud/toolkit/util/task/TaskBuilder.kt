@@ -69,7 +69,7 @@ class TaskContext(
         ).showAt(project)
     }
 
-    fun <R> LazyTask<R>.perform(): Maybe<R> = performIn(this@TaskContext)
+    fun <R> LazyTask<R>.perform(): Maybe<out R> = performIn(this@TaskContext)
 
     fun notifyInfo(actions: ActionsBundle? = null, message: String) {
         val notification = infoNotification(
@@ -108,8 +108,8 @@ fun interface TaskExceptionHandler {
     fun handleError(error: Throwable)
 }
 
-open class TaskAction<R>(private val action: () -> Maybe<R>) {
-    fun handle(): Maybe<R> = action()
+open class TaskAction<out R>(private val action: () -> Maybe<R>) {
+    fun handle(): Maybe<out R> = action()
 }
 
 class TaskInterruptException(override val cause: Throwable? = null) : Exception(cause)

@@ -34,5 +34,7 @@ object CloudIcons {
         val ApiGateway = IconLoader.getIcon("/icons/cloud-gateway.svg", CloudIcons::class.java)
         val Trigger = IconLoader.getIcon("/icons/cloud-trigger.svg", CloudIcons::class.java)
         val ServiceAccount = IconLoader.getIcon("/icons/cloud-service-account.svg", CloudIcons::class.java)
+        val Network = IconLoader.getIcon("/icons/vpc-network.svg", CloudIcons::class.java)
+        val Subnet = IconLoader.getIcon("/icons/vpc-subnet.svg", CloudIcons::class.java)
     }
 }

@@ -40,10 +40,21 @@ class FunctionDeployProcess(
                 Timeout: ${spec.timeoutSeconds}s
                 Service Account: ${if (spec.serviceAccountId.isNullOrEmpty()) "none" else "'${spec.serviceAccountId}'"}
                 
-                Environment Variables: ${if (spec.envVariables.isEmpty()) "none" else spec.envVariables.keys.joinToString { "'$it'" }}
-                Tags: ${if (spec.tags.isEmpty()) "none" else spec.tags.joinToString { "'$it'" }}
+                Environment Variables: ${if (spec.envVariables.isEmpty()) "[]" else spec.envVariables.keys.joinToString { "'$it'" }}
+                Tags: ${if (spec.tags.isEmpty()) "[]" else spec.tags.joinToString { "'$it'" }}
             """).trimIndent()
             )
+
+            if (spec.hasConnectivity()) {
+                if (spec.useSubnets) {
+                    logger.println("\nVPC Subnets:")
+                    spec.subnets.forEach {
+                        logger.println("- $it")
+                    }
+                } else {
+                    logger.println("\nVPC Network: " + spec.networkId)
+                }
+            }
 
             logger.println(
                 "\nSource Files: ${

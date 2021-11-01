@@ -12,11 +12,11 @@ import com.intellij.ui.components.JBList
 import com.intellij.ui.components.JBTextArea
 import com.intellij.ui.components.JBTextField
 import yandex.cloud.toolkit.util.*
-import java.awt.GridBagLayout
+import java.awt.BorderLayout
 import javax.swing.JLabel
 import javax.swing.JList
 
-class EnvironmentVariablesList : YCPanel(GridBagLayout()) {
+class EnvironmentVariablesList : YCPanel(BorderLayout()) {
 
     private val listModel = CollectionListModel<Pair<String, String>>()
     private val list = JBList(listModel)
@@ -62,25 +62,24 @@ class EnvironmentVariablesList : YCPanel(GridBagLayout()) {
     init {
         list.setEmptyText("No Environment Variables")
         list.cellRenderer = EnvironmentVariableListRenderer()
+        withPreferredHeight(110)
 
-        YCUI.gridBag(horizontal = true) {
-            YCUI.separator("Environment variables") addAs fullLine()
+        YCUI.separator("Environment Variables") addAs BorderLayout.NORTH
 
-            ToolbarDecorator.createDecorator(list).apply {
-                setToolbarPosition(ActionToolbarPosition.RIGHT)
-                setMoveDownAction(null)
-                setMoveUpAction(null)
-                setAddAction {
-                    showInputDialog("", "")
-                }
-                setEditAction {
-                    val selectedValue = list.singleSelectedValue ?: return@setEditAction
-                    listModel.remove(selectedValue.first to selectedValue.second)
-                    showInputDialog(selectedValue.first, selectedValue.second)
-                }
-                setEditActionUpdater { list.isSingleValueSelected }
-            }.createPanel().withPreferredHeight(100) addAs fullLine()
-        }
+        ToolbarDecorator.createDecorator(list).apply {
+            setToolbarPosition(ActionToolbarPosition.RIGHT)
+            setMoveDownAction(null)
+            setMoveUpAction(null)
+            setAddAction {
+                showInputDialog("", "")
+            }
+            setEditAction {
+                val selectedValue = list.singleSelectedValue ?: return@setEditAction
+                listModel.remove(selectedValue.first to selectedValue.second)
+                showInputDialog(selectedValue.first, selectedValue.second)
+            }
+            setEditActionUpdater { list.isSingleValueSelected }
+        }.createPanel() addAs BorderLayout.CENTER
     }
 
     fun clear() {

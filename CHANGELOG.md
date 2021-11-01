@@ -1,9 +1,15 @@
 # Changelog
 
 ## [1.1.0]
+### Added
+- VPC listing in explorer
+- VPC support for cloud functions
 ### Improved
 - Now auth profile can read endpoint from CLI profile
 - Now invocation URL can be resolved for authorized function run requests
+- Function deploy dialog can now be resized
+### Fixed
+- Deploy & Run configurations can now be named before saving
 
 ## [1.0.1]
 ### Fixed

@@ -6,7 +6,10 @@ import com.intellij.openapi.components.BaseState
 import com.intellij.openapi.project.Project
 import com.intellij.ui.SimpleColoredComponent
 import com.intellij.ui.SimpleTextAttributes
-import yandex.cloud.toolkit.api.auth.*
+import yandex.cloud.toolkit.api.auth.CloudAuthData
+import yandex.cloud.toolkit.api.auth.CloudAuthMethod
+import yandex.cloud.toolkit.api.auth.CloudAuthService
+import yandex.cloud.toolkit.api.auth.id
 import yandex.cloud.toolkit.api.resource.impl.model.CloudUser
 import yandex.cloud.toolkit.api.service.CloudRepository
 import yandex.cloud.toolkit.util.*
@@ -94,6 +97,8 @@ class CloudProfile(
         }
         return authData.loadedValue
     }
+
+    fun isAuthenticated() = authData.loadedValue != null
 
     fun getAuthDataStatus(): PresentableResourceStatus? = authData.asPresentableStatus()
     fun getAuthDataError(): ResourceLoadingError? = authData.error

@@ -19,7 +19,6 @@ class RemoteResource<E>() {
         state = LoadedResourceState(value)
     }
 
-
     constructor(error: ResourceLoadingError) : this() {
         state = FailedResourceState(null, error)
     }

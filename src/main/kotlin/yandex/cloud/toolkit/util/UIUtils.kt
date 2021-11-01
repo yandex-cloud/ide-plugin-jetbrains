@@ -120,8 +120,8 @@ fun JTree.getTreePath(x: Int, y: Int): TreePath? {
 
 fun ComboBox<*>.reopenPopup() {
     val popup = this.popup
-    if (popup != null && popup.isVisible) {
-        popup.hide()
+    if (popup != null) {
+        if (popup.isVisible) popup.hide()
         popup.show()
     }
 }

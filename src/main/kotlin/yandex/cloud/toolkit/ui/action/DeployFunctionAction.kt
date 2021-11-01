@@ -3,7 +3,9 @@ package yandex.cloud.toolkit.ui.action
 import com.intellij.execution.configurations.runConfigurationType
 import com.intellij.execution.impl.RunManagerImpl
 import com.intellij.icons.AllIcons
-import com.intellij.openapi.actionSystem.*
+import com.intellij.openapi.actionSystem.ActionGroup
+import com.intellij.openapi.actionSystem.AnAction
+import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.application.runInEdt
 import com.intellij.openapi.project.DumbAware
 import com.intellij.openapi.project.DumbAwareAction
@@ -11,8 +13,9 @@ import com.intellij.openapi.project.Project
 import yandex.cloud.toolkit.api.resource.impl.model.CloudFunction
 import yandex.cloud.toolkit.api.resource.impl.user
 import yandex.cloud.toolkit.api.service.CloudOperationService
-import yandex.cloud.toolkit.configuration.function.deploy.DeployFunctionConfigurationType
 import yandex.cloud.toolkit.configuration.function.deploy.DeployFunctionConfiguration
+import yandex.cloud.toolkit.configuration.function.deploy.DeployFunctionConfigurationType
+import yandex.cloud.toolkit.configuration.function.deploy.FunctionDeployResources
 import yandex.cloud.toolkit.ui.dialog.FunctionDeployDialog
 import yandex.cloud.toolkit.util.showAuthenticationNotification
 import yandex.cloud.toolkit.util.task.backgroundTask
@@ -83,15 +86,19 @@ class DeployFunctionAction(val project: Project, val function: CloudFunction) : 
             val versions by CloudOperationService.instance.fetchFunctionVersions(project, function)
             val serviceAccounts by CloudOperationService.instance.fetchServiceAccounts(project, function.group.folder)
             val runtimes by CloudOperationService.instance.fetchRuntimes(project, function.user)
+            val networks by CloudOperationService.instance.fetchVPCNetworks(project, function.group.folder)
 
             runInEdt {
                 FunctionDeployDialog(
                     project,
                     authData,
                     function,
-                    versions,
-                    serviceAccounts,
-                    runtimes,
+                    FunctionDeployResources(
+                        versions,
+                        serviceAccounts,
+                        networks,
+                        runtimes,
+                    ),
                     template,
                     useTemplateTags = false
                 ).show()

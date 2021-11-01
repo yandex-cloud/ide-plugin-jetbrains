@@ -7,8 +7,6 @@ import yandex.cloud.toolkit.util.Maybe
 import yandex.cloud.toolkit.util.remote.resource.LoadingResourceState
 import yandex.cloud.toolkit.util.remote.resource.RemoteResource
 import yandex.cloud.toolkit.util.remote.resource.asLoading
-import java.lang.IllegalArgumentException
-import java.lang.IllegalStateException
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Future
 import javax.swing.event.EventListenerList
@@ -35,6 +33,9 @@ class CloudResourceStorageImpl : CloudResourceStorage {
         addResourceDescriptor(CloudTriggerGroup.Descriptor)
         addResourceDescriptor(CloudGatewayGroup.Descriptor)
         addResourceDescriptor(CloudServiceAccountGroup.Descriptor)
+        addResourceDescriptor(VPCNetworkGroup.Descriptor)
+        addResourceDescriptor(VPCNetwork.Descriptor)
+        addResourceDescriptor(VPCSubnet.Descriptor)
     }
 
     private fun addResourceDescriptor(descriptor: CloudResourceDescriptor) {

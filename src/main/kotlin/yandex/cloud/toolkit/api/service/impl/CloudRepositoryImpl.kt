@@ -25,6 +25,7 @@ import yandex.cloud.api.serverless.functions.v1.FunctionServiceOuterClass
 import yandex.cloud.api.serverless.triggers.v1.TriggerOuterClass
 import yandex.cloud.api.serverless.triggers.v1.TriggerServiceGrpc
 import yandex.cloud.api.serverless.triggers.v1.TriggerServiceOuterClass
+import yandex.cloud.api.vpc.v1.*
 import yandex.cloud.sdk.LocalGrpcMapping
 import yandex.cloud.toolkit.api.auth.CloudAuthData
 import yandex.cloud.toolkit.api.resource.impl.model.*
@@ -217,6 +218,14 @@ class CloudRepositoryImpl : CloudRepository {
                 if (spec.tags.isNotEmpty()) addAllTag(spec.tags)
 
                 setContent(content)
+
+                if (spec.hasConnectivity()) {
+                    connectivity = if (spec.useSubnets) {
+                        FunctionOuterClass.Connectivity.newBuilder().addAllSubnetId(spec.subnets).build()
+                    } else {
+                        FunctionOuterClass.Connectivity.newBuilder().setNetworkId(spec.networkId).build()
+                    }
+                }
             }.build()
 
             authData().functionService.createVersion(request)
@@ -551,6 +560,63 @@ class CloudRepositoryImpl : CloudRepository {
         return CloudOperation("Delete function", operation)
     }
 
+    override fun getNetworkList(
+        authData: CloudAuthData,
+        folderId: String,
+        pointer: RemoteListPointer
+    ): RemoteList<NetworkOuterClass.Network> {
+        val request = NetworkServiceOuterClass.ListNetworksRequest.newBuilder().apply {
+            this.folderId = folderId
+            if (pointer.pageToken != null) pageToken = pointer.pageToken
+            pageSize = pointer.pageSize.toLong()
+        }.build()
+
+        val response = authData().networkService.list(request)
+
+        return RemoteList(
+            response.networksList,
+            RemoteListState(response.nextPageToken)
+        )
+    }
+
+    override fun getSubnetList(
+        authData: CloudAuthData,
+        networkId: String,
+        pointer: RemoteListPointer
+    ): RemoteList<SubnetOuterClass.Subnet> {
+        val request = NetworkServiceOuterClass.ListNetworkSubnetsRequest.newBuilder().apply {
+            this.networkId = networkId
+            if (pointer.pageToken != null) pageToken = pointer.pageToken
+            pageSize = pointer.pageSize.toLong()
+        }.build()
+
+        val response = authData().networkService.listSubnets(request)
+
+        return RemoteList(
+            response.subnetsList,
+            RemoteListState(response.nextPageToken)
+        )
+    }
+
+    override fun getFolderSubnets(
+        authData: CloudAuthData,
+        folderId: String,
+        pointer: RemoteListPointer
+    ): RemoteList<SubnetOuterClass.Subnet> {
+        val request = SubnetServiceOuterClass.ListSubnetsRequest.newBuilder().apply {
+            this.folderId = folderId
+            if (pointer.pageToken != null) pageToken = pointer.pageToken
+            pageSize = pointer.pageSize.toLong()
+        }.build()
+
+        val response = authData().subnetService.list(request)
+
+        return RemoteList(
+            response.subnetsList,
+            RemoteListState(response.nextPageToken)
+        )
+    }
+
     private class CloudGrpcServices(val authData: CloudAuthData) : Disposable {
 
         private val channels = mutableListOf<ManagedChannel>()
@@ -570,66 +636,79 @@ class CloudRepositoryImpl : CloudRepository {
             channels.forEach { it.awaitTermination(1, TimeUnit.SECONDS) }
         }
 
-        val cloudService: CloudServiceGrpc.CloudServiceBlockingStub by lazy {
+        val cloudService by lazy {
             createService(
                 CloudServiceGrpc.CloudServiceBlockingStub::class.java,
                 CloudServiceGrpc::newBlockingStub
             )
         }
 
-        val folderService: FolderServiceGrpc.FolderServiceBlockingStub by lazy {
+        val folderService by lazy {
             createService(
                 FolderServiceGrpc.FolderServiceBlockingStub::class.java,
                 FolderServiceGrpc::newBlockingStub
             )
         }
 
-        val functionService: FunctionServiceGrpc.FunctionServiceBlockingStub by lazy {
+        val functionService by lazy {
             createService(
                 FunctionServiceGrpc.FunctionServiceBlockingStub::class.java,
                 FunctionServiceGrpc::newBlockingStub
             )
         }
 
-        val triggerService: TriggerServiceGrpc.TriggerServiceBlockingStub by lazy {
+        val triggerService by lazy {
             createService(
                 TriggerServiceGrpc.TriggerServiceBlockingStub::class.java,
                 TriggerServiceGrpc::newBlockingStub
             )
         }
 
-        val operationService: OperationServiceGrpc.OperationServiceBlockingStub by lazy {
+        val operationService by lazy {
             createService(
                 OperationServiceGrpc.OperationServiceBlockingStub::class.java,
                 OperationServiceGrpc::newBlockingStub
             )
         }
 
-        val accountService: ServiceAccountServiceGrpc.ServiceAccountServiceBlockingStub by lazy {
+        val accountService by lazy {
             createService(
                 ServiceAccountServiceGrpc.ServiceAccountServiceBlockingStub::class.java,
                 ServiceAccountServiceGrpc::newBlockingStub
             )
         }
 
-        val logService: LogEventServiceGrpc.LogEventServiceBlockingStub by lazy {
+        val logService by lazy {
             createService(
                 LogEventServiceGrpc.LogEventServiceBlockingStub::class.java,
                 LogEventServiceGrpc::newBlockingStub
             )
         }
 
-        val roleService: RoleServiceGrpc.RoleServiceBlockingStub by lazy {
+        val roleService by lazy {
             createService(
-                RoleServiceGrpc.RoleServiceBlockingStub::class.java,
-                RoleServiceGrpc::newBlockingStub
+                RoleServiceGrpc.RoleServiceBlockingStub::class.java, RoleServiceGrpc::newBlockingStub
             )
         }
 
-        val gatewayService: ApiGatewayServiceGrpc.ApiGatewayServiceBlockingStub by lazy {
+        val gatewayService by lazy {
             createService(
                 ApiGatewayServiceGrpc.ApiGatewayServiceBlockingStub::class.java,
                 ApiGatewayServiceGrpc::newBlockingStub
+            )
+        }
+
+        val networkService by lazy {
+            createService(
+                NetworkServiceGrpc.NetworkServiceBlockingStub::class.java,
+                NetworkServiceGrpc::newBlockingStub
+            )
+        }
+
+        val subnetService by lazy {
+            createService(
+                SubnetServiceGrpc.SubnetServiceBlockingStub::class.java,
+                SubnetServiceGrpc::newBlockingStub
             )
         }
     }

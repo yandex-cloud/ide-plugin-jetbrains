@@ -5,10 +5,9 @@ import com.intellij.openapi.actionSystem.ActionToolbarPosition
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogBuilder
 import com.intellij.openapi.ui.DialogWrapper
-import com.intellij.openapi.ui.LabeledComponent
-import com.intellij.ui.*
-import com.intellij.ui.components.JBTextArea
-import com.intellij.ui.components.JBTextField
+import com.intellij.ui.DoubleClickListener
+import com.intellij.ui.ToolbarDecorator
+import com.intellij.ui.TreeUIHelper
 import com.intellij.ui.components.fields.IntegerField
 import com.intellij.ui.tree.AsyncTreeModel
 import com.intellij.ui.tree.StructureTreeModel
@@ -17,12 +16,11 @@ import com.intellij.ui.treeStructure.SimpleTreeStructure
 import com.intellij.ui.treeStructure.Tree
 import com.intellij.util.ui.tree.TreeUtil
 import yandex.cloud.toolkit.api.auth.CloudAuthData
-import yandex.cloud.toolkit.api.explorer.CloudResourceNode
 import yandex.cloud.toolkit.api.resource.impl.model.CloudFunction
 import yandex.cloud.toolkit.api.resource.impl.model.CloudFunctionScalingPolicy
 import yandex.cloud.toolkit.api.resource.impl.model.CloudFunctionVersion
 import yandex.cloud.toolkit.api.service.CloudOperationService
-import yandex.cloud.toolkit.ui.component.CloudResourceField
+import yandex.cloud.toolkit.ui.component.CloudResourceLabel
 import yandex.cloud.toolkit.ui.component.FunctionTagField
 import yandex.cloud.toolkit.ui.node.ScalingPolicyNode
 import yandex.cloud.toolkit.ui.node.ScalingPolicyPropertyNode
@@ -31,7 +29,6 @@ import java.awt.BorderLayout
 import java.awt.event.MouseEvent
 import javax.swing.JComponent
 import javax.swing.JLabel
-import javax.swing.ToolTipManager
 import javax.swing.tree.DefaultMutableTreeNode
 import javax.swing.tree.TreePath
 import javax.swing.tree.TreeSelectionModel
@@ -91,7 +88,7 @@ class FunctionScalingPoliciesDialog(
 
     override fun createCenterPanel(): JComponent {
         return YCUI.borderPanel {
-            CloudResourceField(project, function).labeled("Function") addAs BorderLayout.NORTH
+            CloudResourceLabel(project, function).labeled("Function") addAs BorderLayout.NORTH
 
             ToolbarDecorator.createDecorator(policyTree).apply {
                 setToolbarPosition(ActionToolbarPosition.RIGHT)

@@ -20,19 +20,27 @@ class SpoilerPanel<C : Component>(
     private val autoOpenKey: String? = null
 ) : YCPanel(BorderLayout()) {
 
-    var isOpened: Boolean = true
-        private set
+    private var openState: Boolean = true
 
     private val icon = JBLabel(AllIcons.General.ArrowDown)
 
     private val listeners = EventListenerList()
     private var authOpenCheckBox: PropertyCheckBox? = null
 
+    var isOpened: Boolean
+        get() = openState
+        set(value) {
+            if (value) open() else close()
+        }
+
     init {
         val clickListener = object : ClickListener() {
             override fun onClick(event: MouseEvent, clickCount: Int): Boolean {
-                toggle()
-                return true
+                if (event.button == MouseEvent.BUTTON1) {
+                    toggle()
+                    return true
+                }
+                return false
             }
         }
 
@@ -59,7 +67,7 @@ class SpoilerPanel<C : Component>(
         content addAs BorderLayout.CENTER
 
         if (closed) closeInternal(false)
-        isOpened = !closed
+        openState = !closed
     }
 
     fun addSpoilerListener(listener: SpoilerListener) {
@@ -71,28 +79,28 @@ class SpoilerPanel<C : Component>(
     }
 
     fun open() {
-        if (isOpened) return
-        isOpened = true
+        if (openState) return
+        openState = true
         content.isVisible = true
         listeners.getListeners(SpoilerListener::class.java).forEach { it.onOpened() }
         icon.icon = AllIcons.General.ArrowDown
     }
 
     fun tryOpenAutomatically() {
-        if (authOpenCheckBox?.isSelected == true && !isOpened) open()
+        if (authOpenCheckBox?.isSelected == true && !openState) open()
     }
 
     fun close() = closeInternal(true)
 
     private fun closeInternal(notifyListeners: Boolean) {
-        if (!isOpened) return
-        isOpened = false
+        if (!openState) return
+        openState = false
         if (notifyListeners) listeners.getListeners(SpoilerListener::class.java).forEach { it.onClosed() }
         content.isVisible = false
         icon.icon = AllIcons.General.ArrowRight
     }
 
-    fun toggle() = if (isOpened) close() else open()
+    fun toggle() = if (openState) close() else open()
 }
 
 interface SpoilerListener : EventListener {

@@ -48,3 +48,16 @@ class RemoteListController<E>(
         return list
     }
 }
+
+
+fun <E> loadRemoteList(
+    pageSize: Int = 100,
+    onlyNext: Boolean = true,
+    loader: (RemoteListPointer) -> RemoteList<E>
+): Maybe<RemoteList<E>> {
+    return RemoteListController(pageSize) {
+        doMaybe {
+            loader(it)
+        }
+    }.loadAllPages(onlyNext)
+}
