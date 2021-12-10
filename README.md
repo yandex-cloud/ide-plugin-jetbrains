@@ -1,6 +1,6 @@
 # Yandex.Cloud Toolkit для Intellij Platform
 
-Плагин Yandex.Cloud Toolkit добавляет интеграцию с [Yandex.Cloud](https://cloud.yandex.ru/) в семейство IDE на [платформе Intellij](https://www.jetbrains.com/ru-ru/opensource/idea/) от [JetBrains](https://www.jetbrains.com).
+Плагин Yandex.Cloud Toolkit добавляет интеграцию с [Yandex.Cloud](https://cloud.yandex.ru/) в семейство IDE на [платформе IntelliJ](https://www.jetbrains.com/ru-ru/opensource/idea/) от [JetBrains](https://www.jetbrains.com).
 
 ## Возможности
 
