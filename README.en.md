@@ -1,10 +1,10 @@
-# Yandex.Cloud Toolkit for the Intellij platform
+# Yandex Cloud Toolkit for the Intellij platform
 
-The Yandex.Cloud Toolkit plugin adds integration with [Yandex.Cloud](https://cloud.yandex.com/) to the family of IDEs on the [IntelliJ platform](https://www.jetbrains.com/ru-ru/opensource/idea/) from [JetBrains](https://www.jetbrains.com).
+The Yandex Cloud Toolkit plugin adds integration with [Yandex Cloud](https://cloud.yandex.com/) to the family of IDEs on the [IntelliJ platform](https://www.jetbrains.com/ru-ru/opensource/idea/) from [JetBrains](https://www.jetbrains.com).
 
 ## Scope
 
-* [Resource Manager](https://cloud.yandex.com/docs/resource-manager/): Yandex.Cloud resource management.
+* [Resource Manager](https://cloud.yandex.com/docs/resource-manager/): Yandex Cloud resource management.
 * [Cloud Functions](https://cloud.yandex.com/docs/functions/): Function management, loading versions, remote launch, viewing logs.
 * [API Gateways](https://cloud.yandex.com/docs/api-gateway/): API gateway management, viewing and updating specs.
 * [Service Accounts](https://cloud.yandex.com/docs/iam/concepts/users/service-accounts): Service account management, role assignment.
@@ -18,17 +18,17 @@ All IDEs on the IntelliJ 2020.1+ platform.
 ### Method 1. Plugin repository
 
 1. Add the `https://github.com/yandex-cloud/ide-plugin-jetbrains/releases/download/latest/updatePlugins.xml` plugin repository to the IDE.
-1. Search for and install the Yandex.Cloud Toolkit plugin.
+1. Search for and install the Yandex Cloud Toolkit plugin.
 
 ### Method 2. Installing from disk
 
-1. Download or build the desired version of the Yandex.Cloud Toolkit plugin.
+1. Download or build the desired version of the Yandex Cloud Toolkit plugin.
 1. Install the plugin to the IDE from disk.
 
 ## Usage
 
-1. Use OAuth or the [Yandex.Cloud CLI](https://cloud.yandex.com/docs/cli/) to log in to Yandex.Cloud. To do this, open the `Yandex.Cloud` window in the lower left-hand corner of the IDE and select or create a [Yandex.Cloud account](https://cloud.yandex.com/docs/iam/concepts/#accounts). ![usage1.png](resources/usage1.png)
-1. Resources will appear in the `Yandex.Cloud` window. Select the desired resource and action from the pop-up menu. ![usage2.png](resources/usage2.png)
+1. Use OAuth or the [Yandex Cloud CLI](https://cloud.yandex.com/docs/cli/) to log in to Yandex Cloud. To do this, open the `Yandex Cloud` window in the lower left-hand corner of the IDE and select or create a [Yandex Cloud account](https://cloud.yandex.com/docs/iam/concepts/#accounts). ![usage1.png](resources/usage1.png)
+1. Resources will appear in the `Yandex Cloud` window. Select the desired resource and action from the pop-up menu. ![usage2.png](resources/usage2.png)
 
 ## Creating a build
 
