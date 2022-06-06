@@ -39,8 +39,8 @@ class RemoteListController<E>(
         loadedPagesCount++
     }
 
-    fun loadPrev() = loadPage(next = true)
-    fun loadNext() = loadPage(next = false)
+    fun loadPrev() = loadPage(next = false)
+    fun loadNext() = loadPage(next = true)
 
     fun loadAllPages(onlyNext: Boolean = true): Maybe<RemoteList<E>> {
         if (!onlyNext) while (canLoadPrev) loadPrev()

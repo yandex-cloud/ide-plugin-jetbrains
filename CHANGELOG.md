@@ -1,5 +1,9 @@
 # Changelog
 
+## [1.1.1]
+### Fixed
+- Fix resource list loading with 100+ elements
+
 ## [1.1.0]
 ### Added
 - VPC listing in explorer
