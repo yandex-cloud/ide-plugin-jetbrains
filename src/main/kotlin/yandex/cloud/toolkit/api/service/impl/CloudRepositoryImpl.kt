@@ -9,6 +9,9 @@ import io.grpc.ManagedChannel
 import io.grpc.stub.AbstractStub
 import yandex.cloud.api.access.Access
 import yandex.cloud.api.iam.v1.*
+import yandex.cloud.api.lockbox.v1.PayloadOuterClass
+import yandex.cloud.api.lockbox.v1.PayloadServiceGrpc
+import yandex.cloud.api.lockbox.v1.PayloadServiceOuterClass
 import yandex.cloud.api.logs.v1.LogEventOuterClass
 import yandex.cloud.api.logs.v1.LogEventServiceGrpc
 import yandex.cloud.api.logs.v1.LogEventServiceOuterClass
@@ -226,6 +229,17 @@ class CloudRepositoryImpl : CloudRepository {
                         FunctionOuterClass.Connectivity.newBuilder().setNetworkId(spec.networkId).build()
                     }
                 }
+
+                for (secret in spec.secrets) {
+                    addSecrets(
+                        FunctionOuterClass.Secret.newBuilder()
+                            .setId(secret.id)
+                            .setVersionId(secret.versionId)
+                            .setKey(secret.key)
+                            .setEnvironmentVariable(secret.envVariable)
+                            .build()
+                    )
+                }
             }.build()
 
             authData().functionService.createVersion(request)
@@ -264,6 +278,17 @@ class CloudRepositoryImpl : CloudRepository {
         }
 
         return CloudOperation("Remove scaling policy '$tag'", operation)
+    }
+
+    override fun getLockboxSecret(
+        authData: CloudAuthData,
+        secretId: String,
+        versionId: String?
+    ): PayloadOuterClass.Payload {
+        val request = PayloadServiceOuterClass.GetPayloadRequest.newBuilder()
+        request.secretId = secretId
+        if (versionId != null) request.versionId = versionId
+        return authData().payloadService.get(request.build())
     }
 
     override fun getOperation(authData: CloudAuthData, operationId: String): Maybe<OperationOuterClass.Operation> {
@@ -709,6 +734,12 @@ class CloudRepositoryImpl : CloudRepository {
             createService(
                 SubnetServiceGrpc.SubnetServiceBlockingStub::class.java,
                 SubnetServiceGrpc::newBlockingStub
+            )
+        }
+
+        val payloadService by lazy {
+            createService(
+                PayloadServiceGrpc.PayloadServiceBlockingStub::class.java, PayloadServiceGrpc::newBlockingStub
             )
         }
     }

@@ -1,11 +1,15 @@
 package yandex.cloud.toolkit.util
 
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.ui.Messages
+import com.intellij.openapi.ui.messages.MessagesService
 import yandex.cloud.toolkit.api.resource.impl.model.CloudFunction
 import yandex.cloud.toolkit.ui.action.DeployFunctionAction
 import yandex.cloud.toolkit.ui.action.IgnoreAction
 import yandex.cloud.toolkit.ui.action.ManageProfilesAction
+import yandex.cloud.toolkit.ui.dialog.ManageProfilesDialog
 import java.time.Duration
+import javax.swing.JComponent
 
 fun Project.showAuthenticationNotification() {
     errorNotification(
@@ -31,4 +35,21 @@ fun Project.showNoFunctionVersionWithTagNotification(function: CloudFunction, ve
         "Yandex Cloud Functions",
         "Function '$function' has no version with tag '$versionTag'"
     ).showAt(this, Duration.ofSeconds(10))
+}
+
+fun Project.showAuthenticationMessage(parent: JComponent? = null) {
+    invokeLaterAt(parent) {
+        val result = MessagesService.getInstance().showMessageDialog(
+            this, parent,
+            "You are not authenticated in Yandex Cloud",
+            "Unauthenticated",
+            arrayOf(Messages.getOkButton(), "Manage Profiles"),
+            0, -1,
+            Messages.getErrorIcon(),
+            null, false
+        )
+        if (result == 1) {
+            ManageProfilesDialog(this).show()
+        }
+    }
 }

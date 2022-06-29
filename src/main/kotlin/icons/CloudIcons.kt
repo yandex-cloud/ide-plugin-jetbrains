@@ -17,6 +17,7 @@ object CloudIcons {
         val Label = IconLoader.getIcon("/icons/label.svg", CloudIcons::class.java)
         val Profile = IconLoader.getIcon("/icons/profile.svg", CloudIcons::class.java)
         val ScalingPolicy = IconLoader.getIcon("/icons/scaling-policy.svg", CloudIcons::class.java)
+        val Variable = IconLoader.getIcon("/icons/variable.svg", CloudIcons::class.java)
     }
 
     object Status {
@@ -36,5 +37,6 @@ object CloudIcons {
         val ServiceAccount = IconLoader.getIcon("/icons/cloud-service-account.svg", CloudIcons::class.java)
         val Network = IconLoader.getIcon("/icons/vpc-network.svg", CloudIcons::class.java)
         val Subnet = IconLoader.getIcon("/icons/vpc-subnet.svg", CloudIcons::class.java)
+        val Lockbox = IconLoader.getIcon("/icons/lockbox.svg", CloudIcons::class.java)
     }
 }

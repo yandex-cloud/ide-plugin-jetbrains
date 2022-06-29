@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0]
+### Fixed
+- Fix function env variable key constraints
+- Remove unnecessary before launch block in run configurations
+### Added
+- Support of Lockbox secrets in functions
+
 ## [1.1.1]
 ### Fixed
 - Fix resource list loading with 100+ elements

@@ -21,7 +21,7 @@ import yandex.cloud.toolkit.process.RunContentController
 import yandex.cloud.toolkit.util.logger
 
 class DeployFunctionConfiguration(name: String?, factory: ConfigurationFactory, project: Project) :
-    RunConfigurationMinimalBase<FunctionDeploySpec>(name, factory, project) {
+    RunConfigurationMinimalBase<FunctionDeploySpec>(name, factory, project), WithoutOwnBeforeRunSteps {
 
     override fun clone() = DeployFunctionConfiguration(name, factory, project).apply {
         state.copyFrom(this@DeployFunctionConfiguration.state)
@@ -83,6 +83,7 @@ class FunctionDeploySpec : BaseState() {
     var networkId by string()
     var useSubnets by property(false)
     var subnets by list<String>()
+    var secrets by list<FunctionSecret>()
 
     fun hasConnectivity(): Boolean = if (useSubnets) subnets.isNotEmpty() else !networkId.isNullOrEmpty()
 
@@ -111,6 +112,28 @@ class FunctionDeploySpec : BaseState() {
                 useSubnets = networkId.isNullOrEmpty()
                 subnets = template.connectivity.subnetIdList
             }
+            secrets = template.secretsList.map(FunctionSecret.Companion::from).toMutableList()
+        }
+    }
+}
+
+class FunctionSecret : BaseState() {
+    var id by string()
+    var versionId by string()
+    var key by string()
+    var envVariable by string()
+
+    override fun toString(): String {
+        return "$envVariable = $id -> $versionId -> $key"
+    }
+
+    companion object {
+
+        fun from(secret: FunctionOuterClass.Secret) = FunctionSecret().apply {
+            id = secret.id
+            versionId = secret.versionId
+            key = secret.key
+            envVariable = secret.environmentVariable
         }
     }
 }
