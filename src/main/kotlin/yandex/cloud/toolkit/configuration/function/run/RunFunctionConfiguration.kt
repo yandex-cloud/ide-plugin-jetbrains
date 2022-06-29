@@ -3,10 +3,7 @@ package yandex.cloud.toolkit.configuration.function.run
 import com.intellij.execution.DefaultExecutionResult
 import com.intellij.execution.ExecutionException
 import com.intellij.execution.Executor
-import com.intellij.execution.configurations.ConfigurationFactory
-import com.intellij.execution.configurations.RunConfiguration
-import com.intellij.execution.configurations.RunConfigurationMinimalBase
-import com.intellij.execution.configurations.RunProfileState
+import com.intellij.execution.configurations.*
 import com.intellij.execution.filters.TextConsoleBuilderFactory
 import com.intellij.execution.runners.ExecutionEnvironment
 import com.intellij.openapi.application.ModalityState
@@ -19,7 +16,7 @@ import yandex.cloud.toolkit.process.RunContentController
 import yandex.cloud.toolkit.util.logger
 
 class RunFunctionConfiguration(name: String?, factory: ConfigurationFactory, project: Project) :
-    RunConfigurationMinimalBase<FunctionRunSpec>(name, factory, project) {
+    RunConfigurationMinimalBase<FunctionRunSpec>(name, factory, project), WithoutOwnBeforeRunSteps {
 
     override fun clone() = RunFunctionConfiguration(name, factory, project).apply {
         state.copyFrom(this@RunFunctionConfiguration.state)

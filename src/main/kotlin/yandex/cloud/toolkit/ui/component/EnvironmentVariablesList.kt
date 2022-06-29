@@ -1,22 +1,22 @@
 package yandex.cloud.toolkit.ui.component
 
-import com.intellij.icons.AllIcons
 import com.intellij.openapi.actionSystem.ActionToolbarPosition
-import com.intellij.openapi.ui.DialogBuilder
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
-import com.intellij.ui.CollectionListModel
-import com.intellij.ui.ColoredListCellRenderer
-import com.intellij.ui.SimpleTextAttributes
-import com.intellij.ui.ToolbarDecorator
+import com.intellij.openapi.ui.ValidationInfo
+import com.intellij.ui.*
 import com.intellij.ui.components.JBList
 import com.intellij.ui.components.JBTextArea
 import com.intellij.ui.components.JBTextField
+import icons.CloudIcons
 import yandex.cloud.toolkit.util.*
 import java.awt.BorderLayout
+import java.awt.event.MouseEvent
+import javax.swing.JComponent
 import javax.swing.JLabel
 import javax.swing.JList
 
-class EnvironmentVariablesList : YCPanel(BorderLayout()) {
+class EnvironmentVariablesList(val project: Project) : YCPanel(BorderLayout()) {
 
     private val listModel = CollectionListModel<Pair<String, String>>()
     private val list = JBList(listModel)
@@ -27,37 +27,47 @@ class EnvironmentVariablesList : YCPanel(BorderLayout()) {
             listModel.setItems(value.entries.map { it.toPair() })
         }
 
-    private fun showInputDialog(name: String, value: String) = DialogBuilder(this).apply {
-        title("Add Environment Variable")
+    private inner class VariableEditDialog(val name: String, val value: String) : DialogWrapper(project, true) {
 
-        val nameField = JBTextField(name).withCaretListener {
-            setOkActionEnabled(it.text.isNotEmpty())
-        }
+        val nameField = JBTextField(name)
         val valueArea = JBTextArea(value)
 
-        setOkActionEnabled(name.isNotEmpty())
+        private val keyRestrictions = restrictions<String>("Name") {
+            textIsNotEmpty()
+            textHasNoSpaces()
+            textPattern("[a-zA-Z][a-zA-Z0-9_]*")
+        }
 
-        centerPanel(
+        init {
+            title = "Add Environment Variable"
+            init()
+        }
+
+        override fun doValidate(): ValidationInfo? = keyRestrictions.validate(nameField.text, nameField)
+
+        override fun createCenterPanel(): JComponent = YCUI.borderPanel {
             YCUI.gridPanel {
                 YCUI.gridBag(horizontal = true) {
-                    JLabel("Name") addAs nextln(0.2)
-                    nameField addAs next(0.8)
+                    JLabel("Name ") addAs nextln(0.0)
+                    nameField addAs next(1.0)
                     YCUI.separator("Value") addAs fullLine()
-                    YCUI.scrollPane(valueArea).withPreferredHeight(80) addAs fullLine().coverColumn()
                 }
-            }.withPreferredWidth(400)
-        )
+            } addAs BorderLayout.NORTH
+            YCUI.scrollPane(valueArea).withPreferredHeight(80) addAs BorderLayout.CENTER
+        }.withPreferredWidth(400)
 
-        setOkOperation {
+        override fun doOKAction() {
+            if (!okAction.isEnabled) return
             addEnvVariable(nameField.text to valueArea.text)
-            dialogWrapper.close(DialogWrapper.OK_EXIT_CODE)
+            super.doOKAction()
         }
 
-        setCancelOperation {
+        override fun doCancelAction() {
+            if (!cancelAction.isEnabled) return
             if (name.isNotEmpty()) addEnvVariable(name to value)
-            dialogWrapper.close(DialogWrapper.CANCEL_EXIT_CODE)
+            super.doCancelAction()
         }
-    }.show()
+    }
 
     init {
         list.setEmptyText("No Environment Variables")
@@ -66,17 +76,26 @@ class EnvironmentVariablesList : YCPanel(BorderLayout()) {
 
         YCUI.separator("Environment Variables") addAs BorderLayout.NORTH
 
+        object : DoubleClickListener() {
+            override fun onDoubleClick(event: MouseEvent?): Boolean {
+                val selectedValue = list.singleSelectedValue ?: return true
+                listModel.remove(selectedValue)
+                VariableEditDialog(selectedValue.first, selectedValue.second).show()
+                return true
+            }
+        }.installOn(list)
+
         ToolbarDecorator.createDecorator(list).apply {
             setToolbarPosition(ActionToolbarPosition.RIGHT)
             setMoveDownAction(null)
             setMoveUpAction(null)
             setAddAction {
-                showInputDialog("", "")
+                VariableEditDialog("", "").show()
             }
             setEditAction {
                 val selectedValue = list.singleSelectedValue ?: return@setEditAction
-                listModel.remove(selectedValue.first to selectedValue.second)
-                showInputDialog(selectedValue.first, selectedValue.second)
+                listModel.remove(selectedValue)
+                VariableEditDialog(selectedValue.first, selectedValue.second).show()
             }
             setEditActionUpdater { list.isSingleValueSelected }
         }.createPanel() addAs BorderLayout.CENTER
@@ -99,8 +118,8 @@ class EnvironmentVariablesList : YCPanel(BorderLayout()) {
             selected: Boolean,
             hasFocus: Boolean
         ) {
-            icon = AllIcons.Nodes.Variable
-            append("'${value.first}' = '${value.second}'", SimpleTextAttributes.REGULAR_ATTRIBUTES)
+            icon = CloudIcons.Nodes.Variable
+            append("${value.first} = '${value.second}'", SimpleTextAttributes.REGULAR_ATTRIBUTES)
         }
     }
 }

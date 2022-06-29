@@ -39,11 +39,23 @@ class FunctionDeployProcess(
                 Memory: ${spec.memoryBytes / 1024 / 1024}MB
                 Timeout: ${spec.timeoutSeconds}s
                 Service Account: ${if (spec.serviceAccountId.isNullOrEmpty()) "none" else "'${spec.serviceAccountId}'"}
-                
-                Environment Variables: ${if (spec.envVariables.isEmpty()) "[]" else spec.envVariables.keys.joinToString { "'$it'" }}
                 Tags: ${if (spec.tags.isEmpty()) "[]" else spec.tags.joinToString { "'$it'" }}
             """).trimIndent()
             )
+
+            if (spec.envVariables.isNotEmpty()){
+                logger.println("\nEnvironment Variables:")
+                spec.envVariables.forEach {
+                    logger.println("- ${it.key} = '${it.value}'")
+                }
+            }
+
+            if (spec.secrets.isNotEmpty()) {
+                logger.println("\nSecrets:")
+                spec.secrets.forEach {
+                    logger.println("- $it")
+                }
+            }
 
             if (spec.hasConnectivity()) {
                 if (spec.useSubnets) {

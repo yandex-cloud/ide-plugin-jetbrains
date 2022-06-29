@@ -47,11 +47,13 @@ class DeployFunctionConfigurationEditor(
     private val timeoutField = IntegerField(null, 0, Integer.MAX_VALUE)
     private val memoryField = MemoryField(MIN_MEMORY, MAX_MEMORY, MEMORY_PART, DEFAULT_MEMORY, KEY_MEMORY_VALUES)
 
-    private val envVariablesList = EnvironmentVariablesList()
+    private val envVariablesList = EnvironmentVariablesList(project)
     private val tagsList = FunctionVersionTagsList(null, resources.versions ?: emptyList())
 
     private val networkField = VPCNetworkField(project, target?.group?.folder?.id, resources.networks)
     private val subnetsList = SpoilerPanel("Enter Subnets", VPCSubnetsList(project, target?.group?.folder?.id))
+
+    private val secretsList = FunctionSecretsList(project)
 
     private var vpsVisible = false
     private val vpcTab = YCUI.borderPanel()
@@ -84,6 +86,7 @@ class DeployFunctionConfigurationEditor(
         networkField.value = s.state.networkId ?: ""
         subnetsList.content.subnets = s.state.subnets
         subnetsList.isOpened = s.state.useSubnets
+        secretsList.secrets = s.state.secrets
         checkVPCAvailable(s)
     }
 
@@ -103,6 +106,7 @@ class DeployFunctionConfigurationEditor(
             networkId = networkField.value.nullize()
             subnets = subnetsList.content.subnets.toMutableList()
             useSubnets = subnetsList.isOpened
+            secrets = secretsList.secrets.toMutableList()
         })
     }
 
@@ -179,6 +183,8 @@ class DeployFunctionConfigurationEditor(
                 descriptionArea.withPreferredHeight(100) addAs BorderLayout.NORTH
                 tagsList.withPreferredHeight(100) addAs BorderLayout.CENTER
             })
+
+            addTab("Secrets", secretsList)
 
             vpcTab.apply {
                 networkField.labeled("Network ID") addAs BorderLayout.NORTH
