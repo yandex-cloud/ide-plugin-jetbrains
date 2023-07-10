@@ -1,5 +1,9 @@
 # Changelog
 
+## [Unreleased]
+### Fixed
+- Fix Yandex.Cloud CLI binary detection
+
 ## [1.1.1]
 ### Fixed
 - Fix resource list loading with 100+ elements

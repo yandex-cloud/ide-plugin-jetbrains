@@ -163,7 +163,7 @@ class CLIAuthConfigDialog(
     }
 
     private fun updateStatus(ycToolVersion: String?) = invokeLaterAt(this.contentPanel) {
-        if (ycToolVersion != null && ycToolVersion.startsWith("Yandex.Cloud")) {
+        if (ycToolVersion != null && (ycToolVersion.startsWith("Yandex.Cloud") || ycToolVersion.startsWith("Yandex Cloud"))) {
             cliStatus.text = ycToolVersion
             cliStatus.icon = CloudIcons.Status.Success
         } else {
