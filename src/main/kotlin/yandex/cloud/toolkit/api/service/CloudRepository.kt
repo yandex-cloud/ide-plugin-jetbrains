@@ -5,7 +5,6 @@ import com.intellij.openapi.components.ServiceManager
 import yandex.cloud.api.access.Access
 import yandex.cloud.api.iam.v1.RoleOuterClass
 import yandex.cloud.api.iam.v1.ServiceAccountOuterClass
-import yandex.cloud.api.logs.v1.LogEventOuterClass
 import yandex.cloud.api.operation.OperationOuterClass
 import yandex.cloud.api.resourcemanager.v1.CloudOuterClass
 import yandex.cloud.api.resourcemanager.v1.FolderOuterClass
@@ -102,18 +101,18 @@ interface CloudRepository {
 
     fun getFunction(authData: CloudAuthData, functionId: String): FunctionOuterClass.Function
 
-    /**
-     * @param fromSeconds included
-     * @param toSeconds included
-     */
-    fun readLogs(
-        authData: CloudAuthData,
-        logGroupId: String,
-        streamName: String,
-        fromSeconds: Long,
-        toSeconds: Long,
-        pointer: RemoteListPointer
-    ): RemoteList<LogEventOuterClass.LogEvent>
+//    /**
+//     * @param fromSeconds included
+//     * @param toSeconds included
+//     */
+//    fun readLogs(
+//        authData: CloudAuthData,
+//        logGroupId: String,
+//        streamName: String,
+//        fromSeconds: Long,
+//        toSeconds: Long,
+//        pointer: RemoteListPointer
+//    ): RemoteList<LogEventOuterClass.LogEvent>
 
     fun setFunctionTag(authData: CloudAuthData, versionId: String, tag: String): CloudOperation
 

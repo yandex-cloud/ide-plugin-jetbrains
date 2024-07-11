@@ -315,9 +315,10 @@ class CloudOperationServiceImpl : CloudOperationService {
         pointer: RemoteListPointer
     ): LazyTask<RemoteList<LogLine>> =
         tryLazy("Reading logs...") {
-            CloudRepository.instance.readLogs(
-                authData, logGroupId, streamName, fromSecondsIn, toSecondsEx - 1, pointer
-            ).map(::LogLine)
+            RemoteList.empty<LogLine>()
+//            CloudRepository.instance.readLogs(
+//                authData, logGroupId, streamName, fromSecondsIn, toSecondsEx - 1, pointer
+//            ).map(::LogLine)
         } onError {
             "Failed to read function '$streamName' logs: ${it.message}"
         }

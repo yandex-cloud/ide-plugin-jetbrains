@@ -1,7 +1,6 @@
 package yandex.cloud.toolkit.api.service.impl
 
 import com.google.protobuf.ByteString
-import com.google.protobuf.Timestamp
 import com.intellij.openapi.Disposable
 import com.intellij.util.text.nullize
 import io.grpc.Channel
@@ -9,9 +8,6 @@ import io.grpc.ManagedChannel
 import io.grpc.stub.AbstractStub
 import yandex.cloud.api.access.Access
 import yandex.cloud.api.iam.v1.*
-import yandex.cloud.api.logs.v1.LogEventOuterClass
-import yandex.cloud.api.logs.v1.LogEventServiceGrpc
-import yandex.cloud.api.logs.v1.LogEventServiceOuterClass
 import yandex.cloud.api.operation.OperationOuterClass
 import yandex.cloud.api.operation.OperationServiceGrpc
 import yandex.cloud.api.operation.OperationServiceOuterClass
@@ -340,34 +336,34 @@ class CloudRepositoryImpl : CloudRepository {
         )
     }
 
-    override fun readLogs(
-        authData: CloudAuthData,
-        logGroupId: String,
-        streamName: String,
-        fromSeconds: Long,
-        toSeconds: Long,
-        pointer: RemoteListPointer
-    ): RemoteList<LogEventOuterClass.LogEvent> {
-        val criteria = LogEventServiceOuterClass.Criteria.newBuilder()
-            .setSince(Timestamp.newBuilder().setSeconds(fromSeconds))
-            .setUntil(Timestamp.newBuilder().setSeconds(toSeconds))
-
-        val request = LogEventServiceOuterClass.ReadLogEventsRequest.newBuilder().apply {
-            setLogGroupId(logGroupId)
-            setStreamName(streamName)
-            setCriteria(criteria)
-
-            if (pointer.pageToken != null) pageToken = pointer.pageToken
-            pageSize = pointer.pageSize.toLong()
-        }.build()
-
-        val response = authData().logService.read(request)
-
-        return RemoteList(
-            response.logEventsList,
-            RemoteListState(response.previousPageToken, response.nextPageToken)
-        )
-    }
+//    override fun readLogs(
+//        authData: CloudAuthData,
+//        logGroupId: String,
+//        streamName: String,
+//        fromSeconds: Long,
+//        toSeconds: Long,
+//        pointer: RemoteListPointer
+//    ): RemoteList<LogEventOuterClass.LogEvent> {
+//        val criteria = LogEventServiceOuterClass.Criteria.newBuilder()
+//            .setSince(Timestamp.newBuilder().setSeconds(fromSeconds))
+//            .setUntil(Timestamp.newBuilder().setSeconds(toSeconds))
+//
+//        val request = LogEventServiceOuterClass.ReadLogEventsRequest.newBuilder().apply {
+//            setLogGroupId(logGroupId)
+//            setStreamName(streamName)
+//            setCriteria(criteria)
+//
+//            if (pointer.pageToken != null) pageToken = pointer.pageToken
+//            pageSize = pointer.pageSize.toLong()
+//        }.build()
+//
+//        val response = authData().logService.read(request)
+//
+//        return RemoteList(
+//            response.logEventsList,
+//            RemoteListState(response.previousPageToken, response.nextPageToken)
+//        )
+//    }
 
     override fun setFunctionTag(
         authData: CloudAuthData,
@@ -678,12 +674,12 @@ class CloudRepositoryImpl : CloudRepository {
             )
         }
 
-        val logService by lazy {
-            createService(
-                LogEventServiceGrpc.LogEventServiceBlockingStub::class.java,
-                LogEventServiceGrpc::newBlockingStub
-            )
-        }
+//        val logService by lazy {
+//            createService(
+//                LogEventServiceGrpc.LogEventServiceBlockingStub::class.java,
+//                LogEventServiceGrpc::newBlockingStub
+//            )
+//        }
 
         val roleService by lazy {
             createService(

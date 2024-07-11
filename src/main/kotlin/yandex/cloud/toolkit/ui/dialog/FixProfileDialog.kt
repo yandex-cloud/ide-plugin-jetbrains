@@ -41,8 +41,8 @@ class FixProfileDialog(
         withPreferredSize(500, 200)
 
         YCUI.vbox {
-            +profileLabel
-            +YCUI.separator("Error")
+            add(profileLabel)
+            add(YCUI.separator("Error"))
         } addAs BorderLayout.NORTH
 
         YCUI.scrollPane(

@@ -1,11 +1,11 @@
 package yandex.cloud.toolkit.listener
 
 import com.intellij.ide.AppLifecycleListener
-import com.intellij.openapi.project.Project
+import io.grpc.LoadBalancerRegistry
+import io.grpc.util.OutlierDetectionLoadBalancerProvider
 
 class StartupListener : AppLifecycleListener {
-
-    override fun appStarting(projectFromCommandLine: Project?) {
-
+    override fun appStarted() {
+        LoadBalancerRegistry.getDefaultRegistry().register(OutlierDetectionLoadBalancerProvider())
     }
 }
