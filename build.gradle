@@ -3,16 +3,12 @@ buildscript {
         gradlePluginPortal()
         mavenCentral()
     }
-    dependencies {
-        classpath 'org.kordamp.gradle:markdown-gradle-plugin:2.2.0'
-    }
 }
 
 plugins {
     id 'org.jetbrains.intellij' version '1.15.0'
     id 'org.jetbrains.kotlin.jvm' version '1.8.10'
     id 'com.github.johnrengelman.shadow' version '8.1.1'
-    id 'org.kordamp.gradle.markdown' version '2.2.0'
 }
 
 group 'ru.yandex'
@@ -80,13 +76,13 @@ patchPluginXml {
         into "build/changelog"
     }
 
-    markdownToHtml {
-        sourceDir file("build/changelog")
-        outputDir file("build/changelog")
-    }.runTask()
-
-    pluginDescription = file(descriptionFile).text
-    changeNotes = file("build/changelog/CHANGELOG.html").text
+//    markdownToHtml {
+//        sourceDir file("build/changelog")
+//        outputDir file("build/changelog")
+//    }.runTask()
+//
+//    pluginDescription = file(descriptionFile).text
+//    changeNotes = file("build/changelog/CHANGELOG.html").text
 }
 
 configurations.all {
