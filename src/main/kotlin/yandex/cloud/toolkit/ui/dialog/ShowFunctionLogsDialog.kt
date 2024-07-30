@@ -47,7 +47,7 @@ class ShowFunctionLogsDialog(
     val logsList = RemoteListUI(project, PAGE_SIZES[0]) { pointer ->
         CloudOperationService.instance.fetchFunctionLogs(
             authData,
-            version.function.data.logGroupId,
+            version,
             version.id,
             sinceTimeField.date.time / 1000,
             untilTimeField.date.time / 1000 + 1,

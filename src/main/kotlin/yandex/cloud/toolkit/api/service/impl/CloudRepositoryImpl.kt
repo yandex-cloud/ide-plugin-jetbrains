@@ -1,6 +1,7 @@
 package yandex.cloud.toolkit.api.service.impl
 
 import com.google.protobuf.ByteString
+import com.google.protobuf.Timestamp
 import com.intellij.openapi.Disposable
 import com.intellij.util.text.nullize
 import io.grpc.Channel
@@ -8,6 +9,12 @@ import io.grpc.ManagedChannel
 import io.grpc.stub.AbstractStub
 import yandex.cloud.api.access.Access
 import yandex.cloud.api.iam.v1.*
+import yandex.cloud.api.logging.v1.LogEntryOuterClass
+import yandex.cloud.api.logging.v1.LogGroupServiceGrpc
+import yandex.cloud.api.logging.v1.LogGroupServiceOuterClass.ListLogGroupsRequest
+import yandex.cloud.api.logging.v1.LogReadingServiceGrpc
+import yandex.cloud.api.logging.v1.LogReadingServiceOuterClass.Criteria
+import yandex.cloud.api.logging.v1.LogReadingServiceOuterClass.ReadRequest
 import yandex.cloud.api.operation.OperationOuterClass
 import yandex.cloud.api.operation.OperationServiceGrpc
 import yandex.cloud.api.operation.OperationServiceOuterClass
@@ -22,8 +29,8 @@ import yandex.cloud.api.serverless.triggers.v1.TriggerOuterClass
 import yandex.cloud.api.serverless.triggers.v1.TriggerServiceGrpc
 import yandex.cloud.api.serverless.triggers.v1.TriggerServiceOuterClass
 import yandex.cloud.api.vpc.v1.*
-import yandex.cloud.sdk.LocalGrpcMapping
 import yandex.cloud.toolkit.api.auth.CloudAuthData
+import yandex.cloud.toolkit.api.resource.ResourceType
 import yandex.cloud.toolkit.api.resource.impl.model.*
 import yandex.cloud.toolkit.api.service.CloudRepository
 import yandex.cloud.toolkit.configuration.function.deploy.FunctionDeploySpec
@@ -39,10 +46,6 @@ import java.util.function.Function
 class CloudRepositoryImpl : CloudRepository {
 
     private val services = ConcurrentHashMap<CloudAuthData, CloudGrpcServices>()
-
-    init {
-        LocalGrpcMapping.register()
-    }
 
     override fun invalidateAuthData(authData: CloudAuthData) {
         services.remove(authData)?.dispose()
@@ -336,34 +339,53 @@ class CloudRepositoryImpl : CloudRepository {
         )
     }
 
-//    override fun readLogs(
-//        authData: CloudAuthData,
-//        logGroupId: String,
-//        streamName: String,
-//        fromSeconds: Long,
-//        toSeconds: Long,
-//        pointer: RemoteListPointer
-//    ): RemoteList<LogEventOuterClass.LogEvent> {
-//        val criteria = LogEventServiceOuterClass.Criteria.newBuilder()
-//            .setSince(Timestamp.newBuilder().setSeconds(fromSeconds))
-//            .setUntil(Timestamp.newBuilder().setSeconds(toSeconds))
-//
-//        val request = LogEventServiceOuterClass.ReadLogEventsRequest.newBuilder().apply {
-//            setLogGroupId(logGroupId)
-//            setStreamName(streamName)
-//            setCriteria(criteria)
-//
-//            if (pointer.pageToken != null) pageToken = pointer.pageToken
-//            pageSize = pointer.pageSize.toLong()
-//        }.build()
-//
-//        val response = authData().logService.read(request)
-//
-//        return RemoteList(
-//            response.logEventsList,
-//            RemoteListState(response.previousPageToken, response.nextPageToken)
-//        )
-//    }
+    override fun readLogs(
+        authData: CloudAuthData,
+        logGroupId: String,
+        resourceType: ResourceType?,
+        streamName: String,
+        fromSeconds: Long,
+        toSeconds: Long,
+        pointer: RemoteListPointer,
+    ): RemoteList<LogEntryOuterClass.LogEntry> {
+
+        val request = ReadRequest.newBuilder()
+
+        if (pointer.pageToken == null) {
+            request.criteria = Criteria.newBuilder().apply {
+                setLogGroupId(logGroupId)
+                setSince(Timestamp.newBuilder().setSeconds(fromSeconds))
+                setUntil(Timestamp.newBuilder().setSeconds(toSeconds))
+                pageSize = pointer.pageSize.toLong()
+                if (resourceType != null) {
+                    addResourceTypes(resourceType.id)
+                }
+            }.build()
+        } else {
+            request.pageToken = pointer.pageToken
+        }
+
+        val response = authData().logReadingService.read(request.build())
+
+        return RemoteList(
+            response.entriesList,
+            RemoteListState(response.previousPageToken, response.nextPageToken)
+        )
+    }
+
+    override fun getDefaultLogGroup(authData: CloudAuthData, folderId: String): String {
+        val request = ListLogGroupsRequest.newBuilder().apply {
+            this.folderId = folderId
+            filter = "name=\"default\""
+        }.build()
+
+        val response = authData().logGroupService.list(request)
+        if (response.groupsCount == 0) {
+            throw IllegalStateException("Folder doesn't have default log group")
+        }
+
+        return response.getGroups(0).id
+    }
 
     override fun setFunctionTag(
         authData: CloudAuthData,
@@ -674,12 +696,19 @@ class CloudRepositoryImpl : CloudRepository {
             )
         }
 
-//        val logService by lazy {
-//            createService(
-//                LogEventServiceGrpc.LogEventServiceBlockingStub::class.java,
-//                LogEventServiceGrpc::newBlockingStub
-//            )
-//        }
+        val logReadingService by lazy {
+            createService(
+                LogReadingServiceGrpc.LogReadingServiceBlockingStub::class.java,
+                LogReadingServiceGrpc::newBlockingStub
+            )
+        }
+
+        val logGroupService by lazy {
+            createService(
+                LogGroupServiceGrpc.LogGroupServiceBlockingStub::class.java,
+                LogGroupServiceGrpc::newBlockingStub
+            )
+        }
 
         val roleService by lazy {
             createService(

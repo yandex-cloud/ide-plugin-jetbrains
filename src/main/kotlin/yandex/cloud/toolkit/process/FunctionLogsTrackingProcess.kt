@@ -49,7 +49,7 @@ class FunctionLogsTrackingProcess(
         do {
             val logs = CloudOperationService.instance.fetchFunctionLogs(
                 authData,
-                version.function.data.logGroupId,
+                version,
                 version.id,
                 interval.sinceSeconds,
                 interval.untilSeconds,
