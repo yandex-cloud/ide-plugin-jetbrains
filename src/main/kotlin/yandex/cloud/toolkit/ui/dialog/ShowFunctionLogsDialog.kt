@@ -48,7 +48,6 @@ class ShowFunctionLogsDialog(
         CloudOperationService.instance.fetchFunctionLogs(
             authData,
             version,
-            version.id,
             sinceTimeField.date.time / 1000,
             untilTimeField.date.time / 1000 + 1,
             pointer

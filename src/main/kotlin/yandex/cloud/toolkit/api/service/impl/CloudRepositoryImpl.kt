@@ -356,6 +356,7 @@ class CloudRepositoryImpl : CloudRepository {
                 setLogGroupId(logGroupId)
                 setSince(Timestamp.newBuilder().setSeconds(fromSeconds))
                 setUntil(Timestamp.newBuilder().setSeconds(toSeconds))
+                addStreamNames(streamName)
                 pageSize = pointer.pageSize.toLong()
                 if (resourceType != null) {
                     addResourceTypes(resourceType.id)

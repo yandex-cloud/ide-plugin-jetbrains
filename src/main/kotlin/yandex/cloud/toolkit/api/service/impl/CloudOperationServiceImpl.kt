@@ -311,7 +311,6 @@ class CloudOperationServiceImpl : CloudOperationService {
     override fun fetchFunctionLogs(
         authData: CloudAuthData,
         version: CloudFunctionVersion,
-        streamName: String,
         fromSecondsIn: Long,
         toSecondsEx: Long,
         pointer: RemoteListPointer
@@ -319,10 +318,10 @@ class CloudOperationServiceImpl : CloudOperationService {
         tryLazy("Reading logs...") {
             val logGroupId = getLogGroupId(authData, version)
             CloudRepository.instance.readLogs(
-                authData, logGroupId, ResourceType.SERVERLESS_FUNCTION, streamName, fromSecondsIn, toSecondsEx - 1, pointer
+                authData, logGroupId, ResourceType.SERVERLESS_FUNCTION, "", fromSecondsIn, toSecondsEx - 1, pointer
             ).map(::LogLine)
         } onError {
-            "Failed to read function '$streamName' logs: ${it.message}"
+            "Failed to read function '${version.id}' logs: ${it.message}"
         }
 
     private fun getLogGroupId(authData: CloudAuthData, version: CloudFunctionVersion): String {
