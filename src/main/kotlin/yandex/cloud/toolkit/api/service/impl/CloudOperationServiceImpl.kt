@@ -317,8 +317,9 @@ class CloudOperationServiceImpl : CloudOperationService {
     ): LazyTask<RemoteList<LogLine>> =
         tryLazy("Reading logs...") {
             val logGroupId = getLogGroupId(authData, version)
+            val filter = "(source=user or source=system) and version_id=${version.id}"
             CloudRepository.instance.readLogs(
-                authData, logGroupId, ResourceType.SERVERLESS_FUNCTION, "", fromSecondsIn, toSecondsEx - 1, pointer
+                authData, logGroupId, listOf(ResourceType.SERVERLESS_FUNCTION), listOf(version.function.id), filter, fromSecondsIn, toSecondsEx - 1, pointer
             ).map(::LogLine)
         } onError {
             "Failed to read function '${version.id}' logs: ${it.message}"

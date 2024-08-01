@@ -342,8 +342,9 @@ class CloudRepositoryImpl : CloudRepository {
     override fun readLogs(
         authData: CloudAuthData,
         logGroupId: String,
-        resourceType: ResourceType?,
-        streamName: String,
+        resourceTypes: List<ResourceType>?,
+        resourceIds: List<String>?,
+        filter: String?,
         fromSeconds: Long,
         toSeconds: Long,
         pointer: RemoteListPointer,
@@ -356,11 +357,10 @@ class CloudRepositoryImpl : CloudRepository {
                 setLogGroupId(logGroupId)
                 setSince(Timestamp.newBuilder().setSeconds(fromSeconds))
                 setUntil(Timestamp.newBuilder().setSeconds(toSeconds))
-                addStreamNames(streamName)
                 pageSize = pointer.pageSize.toLong()
-                if (resourceType != null) {
-                    addResourceTypes(resourceType.id)
-                }
+                resourceTypes?.let { addAllResourceTypes(it.map { rt -> rt.id }) }
+                resourceIds?.let { addAllResourceIds(it) }
+                filter?.let { setFilter(it) }
             }.build()
         } else {
             request.pageToken = pointer.pageToken

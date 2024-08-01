@@ -110,8 +110,9 @@ interface CloudRepository {
     fun readLogs(
         authData: CloudAuthData,
         logGroupId: String,
-        resourceType: ResourceType?,
-        streamName: String,
+        resourceTypes: List<ResourceType>?,
+        resourceIds: List<String>?,
+        filter: String?,
         fromSeconds: Long,
         toSeconds: Long,
         pointer: RemoteListPointer
