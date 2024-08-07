@@ -4,18 +4,24 @@ import com.intellij.openapi.options.SettingsEditor
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.ValidationInfo
 import com.intellij.ui.ClickListener
+import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBTabbedPane
 import com.intellij.ui.components.fields.IntegerField
+import com.intellij.ui.layout.selected
 import com.intellij.util.text.nullize
 import com.intellij.util.ui.JBUI
+import org.jdesktop.swingx.JXStatusBar.Constraint
 import yandex.cloud.toolkit.api.resource.impl.model.CloudFunction
 import yandex.cloud.toolkit.ui.component.*
 import yandex.cloud.toolkit.util.*
 import java.awt.BorderLayout
+import java.awt.event.ItemEvent
 import java.awt.event.MouseEvent
 import javax.swing.JComponent
+import javax.swing.JTabbedPane
 import javax.swing.JTextField
+import javax.swing.SpringLayout.Constraints
 
 class DeployFunctionConfigurationEditor(
     val project: Project,
@@ -32,6 +38,9 @@ class DeployFunctionConfigurationEditor(
         private const val MEMORY_PART = 128
 
         private val KEY_MEMORY_VALUES = intArrayOf(MIN_MEMORY, 512, 1024, 1536, MAX_MEMORY)
+
+        private const val LOCAL_SOURCE_FILES_TAB_INDEX = 0
+        private const val OBJECT_STORAGE_SOURCE_TAB_INDEX = 1
     }
 
     private val functionField = CloudResourceLabel(project, target, CloudFunction.Descriptor.icon)
@@ -39,8 +48,19 @@ class DeployFunctionConfigurationEditor(
 
     private val runtimeField = FunctionRuntimeField(project, resources.runtimes)
     private val entryPointField = JTextField()
-    private val sourceFilesList = SourceFilesList(project)
-    private val sourceFolderPolicyBox = SourceFolderPolicyBox()
+
+    private val sourceTabs = JBTabbedPane()
+    private val localSourceFilesPanel = SourceFilesPanel(project)
+
+    private val updateObjectStorageCheckBox = JBCheckBox().apply {
+        addItemListener { event ->
+            objectStorageSourceFilesPanel.isVisible = event.stateChange == ItemEvent.SELECTED
+        }
+    }
+    private val objectStorageBucketField = ObjectStorageBucketField(project, target?.group?.folder)
+    private val objectStorageObjectField = ObjectStorageObjectField(project)
+    private val objectStorageSourceFilesPanel = SourceFilesPanel(project).apply { isVisible = false}
+
     private val descriptionArea = LimitedTextArea("Description", MAX_DESCRIPTION_LENGTH)
 
     private val serviceAccountField = ServiceAccountField(project, target?.group?.folder?.id, resources.serviceAccounts)
@@ -73,8 +93,22 @@ class DeployFunctionConfigurationEditor(
         functionField.value = s.state.functionId ?: ""
         runtimeField.text = s.state.runtime
         entryPointField.text = s.state.entryPoint
-        sourceFilesList.files = s.state.sourceFiles
-        sourceFolderPolicyBox.value = SourceFolderPolicy.byId(s.state.sourceFolderPolicy)
+        if (!s.state.useObjectStorage) {
+            sourceTabs.selectedIndex = LOCAL_SOURCE_FILES_TAB_INDEX
+            localSourceFilesPanel.sourceFilesList.files = s.state.sourceFiles
+            localSourceFilesPanel.sourceFolderPolicyBox.value = SourceFolderPolicy.byId(s.state.sourceFolderPolicy)
+        } else {
+            sourceTabs.selectedIndex = OBJECT_STORAGE_SOURCE_TAB_INDEX
+            if (s.state.updateObjectStorage) {
+                updateObjectStorageCheckBox.isSelected = true
+                objectStorageSourceFilesPanel.sourceFilesList.files = s.state.sourceFiles
+                objectStorageSourceFilesPanel.sourceFolderPolicyBox.value = SourceFolderPolicy.byId(s.state.sourceFolderPolicy)
+            } else {
+                updateObjectStorageCheckBox.isSelected = false
+            }
+            objectStorageBucketField.text = s.state.objectStorageBucket
+            objectStorageObjectField.text = s.state.objectStorageObject
+        }
         descriptionArea.text = s.state.description ?: ""
         memoryField.valueBytes = s.state.memoryBytes
         timeoutField.value = s.state.timeoutSeconds.toInt()
@@ -87,13 +121,34 @@ class DeployFunctionConfigurationEditor(
         checkVPCAvailable(s)
     }
 
+    private val usingLocalSourceFiles: Boolean
+        get() = sourceTabs.selectedIndex == LOCAL_SOURCE_FILES_TAB_INDEX
+
+    private val usingObjectStorage: Boolean
+        get() = !usingLocalSourceFiles
+
+
     override fun applyEditorTo(s: DeployFunctionConfiguration) {
         s.loadState(FunctionDeploySpec().apply {
             functionId = functionField.value
             runtime = runtimeField.text
             entryPoint = entryPointField.text
-            sourceFiles = sourceFilesList.files.toMutableList()
-            sourceFolderPolicy = sourceFolderPolicyBox.value.id
+            if (usingLocalSourceFiles) {
+                useObjectStorage = false
+                sourceFiles = localSourceFilesPanel.sourceFilesList.files.toMutableList()
+                sourceFolderPolicy = localSourceFilesPanel.sourceFolderPolicyBox.value.id
+            } else {
+                useObjectStorage = true
+                if (updateObjectStorageCheckBox.isSelected) {
+                    updateObjectStorage = true
+                    sourceFiles = objectStorageSourceFilesPanel.sourceFilesList.files.toMutableList()
+                    sourceFolderPolicy = objectStorageSourceFilesPanel.sourceFolderPolicyBox.value.id
+                } else {
+                    updateObjectStorage = false
+                }
+                objectStorageBucket = objectStorageBucketField.text
+                objectStorageObject = objectStorageObjectField.text
+            }
             description = descriptionArea.text
             memoryBytes = memoryField.valueBytes
             timeoutSeconds = timeoutField.value.toLong()
@@ -109,7 +164,12 @@ class DeployFunctionConfigurationEditor(
     fun doValidate(): ValidationInfo? = when {
         functionField.value.isEmpty() -> ValidationInfo("No function ID defined", functionField)
         entryPointField.text.isNullOrEmpty() -> ValidationInfo("No entry point defined", entryPointField)
-        sourceFilesList.files.isEmpty() -> ValidationInfo("No source files selected", sourceFilesList)
+        usingLocalSourceFiles && localSourceFilesPanel.sourceFilesList.files.isEmpty() ->
+            ValidationInfo("No source files selected", localSourceFilesPanel.sourceFilesList)
+        usingObjectStorage && updateObjectStorageCheckBox.isSelected && objectStorageSourceFilesPanel.sourceFilesList.files.isEmpty() ->
+            ValidationInfo("No source files selected", objectStorageSourceFilesPanel.sourceFilesList)
+        usingObjectStorage && objectStorageBucketField.text.isNullOrEmpty() -> ValidationInfo("No Object Storage bucket defined")
+        usingObjectStorage && objectStorageObjectField.text.isNullOrEmpty() -> ValidationInfo("No Object Storage object defined")
         !timeoutField.isValueValid -> ValidationInfo("Invalid timeout value", timeoutField)
         runtimeField.text.isBlank() -> ValidationInfo("No runtime defined", runtimeField)
         else -> descriptionArea.checkRestrictions()
@@ -157,8 +217,22 @@ class DeployFunctionConfigurationEditor(
                     }
                 } addAs BorderLayout.NORTH
 
-                sourceFilesList addAs BorderLayout.CENTER
-                sourceFolderPolicyBox.labeled("Source Folders") addAs BorderLayout.SOUTH
+                sourceTabs.apply {
+                    addTab("Source Files", localSourceFilesPanel)
+                    addTab("Object Storage", YCUI.borderPanel {
+                        YCUI.gridPanel {
+                            YCUI.gridBag(true) {
+                                JBLabel("Bucket: ") addAs nextln(0.0)
+                                objectStorageBucketField addAs next(1.0)
+                                JBLabel("Object: ") addAs nextln(0.0)
+                                objectStorageObjectField addAs next(1.0)
+                                JBLabel("Update from local files: ") addAs nextln(0.0)
+                                updateObjectStorageCheckBox addAs next(1.0)
+                            }
+                        } addAs BorderLayout.NORTH
+                        objectStorageSourceFilesPanel addAs BorderLayout.CENTER
+                    })
+                } addAs BorderLayout.CENTER
             })
 
             addTab("Parameters", YCUI.borderPanel {

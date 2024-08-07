@@ -12,6 +12,7 @@ import yandex.cloud.api.resourcemanager.v1.FolderOuterClass
 import yandex.cloud.api.serverless.apigateway.v1.Apigateway
 import yandex.cloud.api.serverless.functions.v1.FunctionOuterClass
 import yandex.cloud.api.serverless.triggers.v1.TriggerOuterClass
+import yandex.cloud.api.storage.v1.BucketOuterClass
 import yandex.cloud.api.vpc.v1.NetworkOuterClass
 import yandex.cloud.api.vpc.v1.SubnetOuterClass
 import yandex.cloud.toolkit.api.auth.CloudAuthData
@@ -80,6 +81,13 @@ interface CloudRepository {
         folderId: String,
         pointer: RemoteListPointer
     ): RemoteList<Apigateway.ApiGateway>
+
+    fun createFunctionVersion(
+        authData: CloudAuthData,
+        spec: FunctionDeploySpec,
+        bucketName: String,
+        objectName: String
+    ): CloudOperation
 
     fun createFunctionVersion(
         authData: CloudAuthData,
@@ -195,6 +203,11 @@ interface CloudRepository {
         networkId: String,
         pointer: RemoteListPointer
     ): RemoteList<SubnetOuterClass.Subnet>
+
+    fun getBucketsList(
+        authData: CloudAuthData,
+        folderId: String
+    ): List<BucketOuterClass.Bucket>
 
     fun getFolderSubnets(
         authData: CloudAuthData,

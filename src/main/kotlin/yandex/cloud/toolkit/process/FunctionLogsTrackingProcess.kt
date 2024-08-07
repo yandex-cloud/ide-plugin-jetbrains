@@ -133,6 +133,7 @@ class FunctionLogsTrackingProcess(
 
                     val newInterval = LogsInterval(sinceSeconds, untilSeconds, lastLine, lastLine)
                     val logsLines = loadInterval(authData, newInterval) ?: return@backgroundTask
+                    println("got logs: ${logsLines.size}")
                     intervals.addLast(newInterval)
                     if (logsLines.isNotEmpty()) appendLogs(newInterval, logsLines)
 

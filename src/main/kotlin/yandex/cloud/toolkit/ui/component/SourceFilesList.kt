@@ -49,8 +49,8 @@ class SourceFilesList(val project: Project) : YCPanel(BorderLayout()) {
                 val descriptor = FileChooserDescriptor(
                     true,
                     true,
-                    false,
-                    false,
+                    true,
+                    true,
                     false,
                     true
                 )

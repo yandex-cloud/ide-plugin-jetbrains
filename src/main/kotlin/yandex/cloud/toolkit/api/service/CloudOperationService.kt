@@ -4,6 +4,7 @@ import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.project.Project
 import yandex.cloud.api.access.Access
 import yandex.cloud.api.iam.v1.RoleOuterClass
+import yandex.cloud.api.storage.v1.BucketOuterClass
 import yandex.cloud.api.vpc.v1.SubnetOuterClass
 import yandex.cloud.toolkit.api.auth.CloudAuthData
 import yandex.cloud.toolkit.api.resource.impl.model.*
@@ -45,6 +46,8 @@ interface CloudOperationService {
     fun fetchFunctions(project: Project, folder: CloudFolder): LazyTask<List<CloudFunction>>
 
     fun fetchRuntimes(project: Project, user: CloudUser): LazyTask<List<String>>
+
+    fun fetchBuckets(user: CloudUser, folder: CloudFolder): LazyTask<List<BucketOuterClass.Bucket>>
 
     fun fetchRoles(project: Project, user: CloudUser): LazyTask<List<RoleOuterClass.Role>>
 

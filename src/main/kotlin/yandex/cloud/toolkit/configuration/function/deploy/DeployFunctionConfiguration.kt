@@ -65,6 +65,17 @@ class DeployFunctionConfiguration(name: String?, factory: ConfigurationFactory, 
 
             return configuration
         }
+
+        fun byFunctionDeploySpec(
+            project: Project,
+            spec: FunctionDeploySpec
+        ): DeployFunctionConfiguration {
+            val configurationType = runConfigurationType<DeployFunctionConfigurationType>()
+            val configuration = configurationType.createTemplateConfiguration(project)
+
+            configuration.loadState(spec)
+            return configuration
+        }
     }
 }
 
@@ -83,6 +94,10 @@ class FunctionDeploySpec : BaseState() {
     var networkId by string()
     var useSubnets by property(false)
     var subnets by list<String>()
+    var useObjectStorage by property(false)
+    var objectStorageBucket by string()
+    var objectStorageObject by string()
+    var updateObjectStorage by property(false)
 
     fun hasConnectivity(): Boolean = if (useSubnets) subnets.isNotEmpty() else !networkId.isNullOrEmpty()
 

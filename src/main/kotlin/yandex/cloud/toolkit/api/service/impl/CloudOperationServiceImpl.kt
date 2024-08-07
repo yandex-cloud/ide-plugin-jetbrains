@@ -294,6 +294,15 @@ class CloudOperationServiceImpl : CloudOperationService {
             "Failed to fetch list of runtimes"
         }
 
+    override fun fetchBuckets(user: CloudUser, folder: CloudFolder) = doLazy("Fetching buckets...") {
+        val authData = user.authData ?: throw UnauthenticatedException()
+        doMaybe {
+            CloudRepository.instance.getBucketsList(authData, folder.id)
+        }
+    } onError {
+        "Failed to fetch Object Storage buckets of folder '${folder.id}'"
+    }
+
     override fun fetchRoles(project: Project, user: CloudUser) =
         user.getOrLoad(CloudUser.AvailableRoles, project, "Fetching available roles") {
             AvailableRolesLoader

@@ -28,6 +28,9 @@ import yandex.cloud.api.serverless.functions.v1.FunctionServiceOuterClass
 import yandex.cloud.api.serverless.triggers.v1.TriggerOuterClass
 import yandex.cloud.api.serverless.triggers.v1.TriggerServiceGrpc
 import yandex.cloud.api.serverless.triggers.v1.TriggerServiceOuterClass
+import yandex.cloud.api.storage.v1.BucketOuterClass
+import yandex.cloud.api.storage.v1.BucketServiceGrpc
+import yandex.cloud.api.storage.v1.BucketServiceOuterClass
 import yandex.cloud.api.vpc.v1.*
 import yandex.cloud.toolkit.api.auth.CloudAuthData
 import yandex.cloud.toolkit.api.resource.ResourceType
@@ -192,6 +195,46 @@ class CloudRepositoryImpl : CloudRepository {
     override fun getAvailableRolesList(authData: CloudAuthData): List<RoleOuterClass.Role> {
         val request = RoleServiceOuterClass.ListRolesRequest.newBuilder().build()
         return authData().roleService.list(request).rolesList
+    }
+
+    override fun createFunctionVersion(
+        authData: CloudAuthData,
+        spec: FunctionDeploySpec,
+        bucketName: String,
+        objectName: String
+    ): CloudOperation {
+        val operation = doMaybe {
+            val request = FunctionServiceOuterClass.CreateFunctionVersionRequest.newBuilder().apply {
+                functionId = spec.functionId ?: ""
+                runtime = spec.runtime ?: ""
+                entrypoint = spec.entryPoint ?: ""
+                resources = FunctionOuterClass.Resources.newBuilder().setMemory(spec.memoryBytes).build()
+
+                executionTimeout = com.google.protobuf.Duration.newBuilder().setSeconds(
+                    spec.timeoutSeconds
+                ).build()
+
+                spec.description.nullize()?.let { description = it }
+                spec.serviceAccountId.nullize()?.let { serviceAccountId = it }
+
+                if (spec.envVariables.isNotEmpty()) putAllEnvironment(spec.envVariables)
+                if (spec.tags.isNotEmpty()) addAllTag(spec.tags)
+
+                setPackage(packageBuilder.setBucketName(bucketName).setObjectName(objectName))
+
+                if (spec.hasConnectivity()) {
+                    connectivity = if (spec.useSubnets) {
+                        FunctionOuterClass.Connectivity.newBuilder().addAllSubnetId(spec.subnets).build()
+                    } else {
+                        FunctionOuterClass.Connectivity.newBuilder().setNetworkId(spec.networkId).build()
+                    }
+                }
+            }.build()
+
+            authData().functionService.createVersion(request)
+        }
+
+        return CloudOperation("Function '${spec.functionId}' deployment", operation)
     }
 
     override fun createFunctionVersion(
@@ -617,6 +660,19 @@ class CloudRepositoryImpl : CloudRepository {
         )
     }
 
+    override fun getBucketsList(
+        authData: CloudAuthData,
+        folderId: String
+    ): List<BucketOuterClass.Bucket> {
+        val request = BucketServiceOuterClass.ListBucketsRequest.newBuilder().apply {
+            setFolderId(folderId)
+        }.build()
+
+        val response = authData().bucketService.list(request)
+
+        return response.bucketsList
+    }
+
     override fun getFolderSubnets(
         authData: CloudAuthData,
         folderId: String,
@@ -735,6 +791,13 @@ class CloudRepositoryImpl : CloudRepository {
             createService(
                 SubnetServiceGrpc.SubnetServiceBlockingStub::class.java,
                 SubnetServiceGrpc::newBlockingStub
+            )
+        }
+
+        val bucketService by lazy {
+            createService(
+                BucketServiceGrpc.BucketServiceBlockingStub::class.java,
+                BucketServiceGrpc::newBlockingStub
             )
         }
     }

@@ -26,9 +26,11 @@ dependencies {
     implementation "com.yandex.cloud:java-sdk-services:$YC_SDK_VERSION"
     implementation "com.yandex.cloud:java-sdk-functions:$YC_SDK_VERSION"
     implementation "com.yandex.cloud:java-sdk-auth:$YC_SDK_VERSION"
+    implementation "com.amazonaws:aws-java-sdk-s3:$AWS_SDK_VERSION"
 
     implementation "com.google.protobuf:protobuf-java:$PROTOBUF_VERSION"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+
 }
 
 compileKotlin {

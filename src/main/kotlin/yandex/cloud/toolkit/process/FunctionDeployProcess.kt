@@ -8,10 +8,15 @@ import yandex.cloud.api.serverless.functions.v1.FunctionOuterClass
 import yandex.cloud.toolkit.api.profile.impl.profileStorage
 import yandex.cloud.toolkit.api.resource.get
 import yandex.cloud.toolkit.api.resource.impl.model.CloudFunction
+import yandex.cloud.toolkit.api.resource.impl.model.CloudOperation
+import yandex.cloud.toolkit.api.resource.impl.user
 import yandex.cloud.toolkit.api.service.CloudRepository
 import yandex.cloud.toolkit.api.service.awaitEnd
+import yandex.cloud.toolkit.configuration.function.deploy.DeployFunctionConfiguration
 import yandex.cloud.toolkit.configuration.function.deploy.FunctionDeploySpec
+import yandex.cloud.toolkit.ui.action.DeployFunctionAction
 import yandex.cloud.toolkit.ui.action.TestFunctionByIdAction
+import yandex.cloud.toolkit.ui.dialog.FunctionDeployDialog
 import yandex.cloud.toolkit.util.*
 import yandex.cloud.toolkit.util.task.backgroundTask
 import yandex.cloud.toolkit.util.task.notAuthenticatedError
@@ -56,63 +61,107 @@ class FunctionDeployProcess(
                 }
             }
 
-            logger.println(
-                "\nSource Files: ${
-                    "\n" + spec.sourceFiles.joinToString("") { "- $it\n" }
-                }(Policy: ${SourceFolderPolicy.byId(spec.sourceFolderPolicy).displayName})"
-            )
+            if (!spec.useObjectStorage) {
+                logSourceFiles(spec.sourceFiles, SourceFolderPolicy.byId(spec.sourceFolderPolicy))
+            } else {
+                if (spec.updateObjectStorage) {
+                    logger.println(
+                        """
+                        Will update Object Storage with local files
+                    """.trimIndent())
+                    logSourceFiles(spec.sourceFiles, SourceFolderPolicy.byId(spec.sourceFolderPolicy))
+                }
+                logger.println(
+                    """
+                        Bucket: ${spec.objectStorageBucket}
+                        Object: ${spec.objectStorageObject}
+                    """.trimIndent()
+                )
+            }
+
 
             val profile = project.profileStorage.profile
             val authData = profile?.getAuthData(toUse = true) ?: steps.notAuthenticatedError()
 
-            if (spec.sourceFiles.isEmpty()) steps.error("No source files selected")
 
-            logger.println()
-            steps.next("Creating archive")
+            var archiveFile: File? = null
 
-            val archiveFile = tryDo {
-                FileUtil.createTempFile("yc-toolkit-function-deploy", spec.functionId, true)
-            } onFail steps.handleError()
+            if (!spec.useObjectStorage || spec.updateObjectStorage) {
+                if (spec.sourceFiles.isEmpty()) steps.error("No source files selected")
 
-            steps.next("Packing source files")
+                steps.next("Creating archive")
+                archiveFile = tryDo {
+                    FileUtil.createTempFile("yc-toolkit-function-deploy", spec.functionId, true)
+                } onFail steps.handleError()
 
-            tryDo {
-                Compressor.Zip(archiveFile).use { compressor ->
-                    val sourceFolderPolicy = SourceFolderPolicy.byId(spec.sourceFolderPolicy)
+                steps.next("Packing source files")
 
-                    fun pack(file: File, depth: Int) {
-                        if (file.isDirectory) {
-                            if (depth == 0 && sourceFolderPolicy == SourceFolderPolicy.EXTRACT || sourceFolderPolicy == SourceFolderPolicy.FLATTEN) {
-                                file.listFiles()?.forEach { pack(it, depth + 1) }
-                            } else {
-                                compressor.addDirectory(file.name, file)
+                tryDo {
+                    Compressor.Zip(archiveFile).use { compressor ->
+                        val sourceFolderPolicy = SourceFolderPolicy.byId(spec.sourceFolderPolicy)
+
+                        fun pack(file: File, depth: Int) {
+                            if (file.isDirectory) {
+                                if (depth == 0 && sourceFolderPolicy == SourceFolderPolicy.EXTRACT || sourceFolderPolicy == SourceFolderPolicy.FLATTEN) {
+                                    file.listFiles()?.forEach { pack(it, depth + 1) }
+                                } else {
+                                    compressor.addDirectory(file.name, file)
+                                }
+                                return
                             }
-                            return
+
+                            compressor.addFile(file.name, file)
                         }
 
-                        compressor.addFile(file.name, file)
+                        for (sourceFile in spec.sourceFiles) {
+                            val file = File(sourceFile)
+                            pack(file, 0)
+                        }
                     }
+                } onFail steps.handleError { "Failed to pack source files" }
+            }
 
-                    for (sourceFile in spec.sourceFiles) {
-                        val file = File(sourceFile)
-                        pack(file, 0)
+            val deployOperation: CloudOperation
+
+            if (!spec.useObjectStorage) {
+                if (!checkSourceSize(archiveFile!!)) {
+                    CloudFunction.forUser(profile.resourceUser.user, spec.functionId ?: "").get()?.let { function ->
+                        DeployFunctionAction(project, function)
+                        val configuration = DeployFunctionConfiguration.byFunctionDeploySpec(project, spec)
+                        FunctionDeployDialog.createAndShow(project, function, configuration)
                     }
+                    steps.error("Archive size limit has been exceeded")
                 }
-            } onFail steps.handleError { "Failed to pack source files" }
 
-            steps.next("Deploying function")
+                steps.next("Deploying function")
 
-            val operation = CloudRepository.instance.createFunctionVersion(
-                authData,
-                spec,
-                ByteString.readFrom(archiveFile.inputStream())
-            )
-            val error = operation.data.error
+                deployOperation = CloudRepository.instance.createFunctionVersion(
+                    authData,
+                    spec,
+                    ByteString.readFrom(archiveFile.inputStream())
+                )
+
+
+            } else {
+
+                steps.next("Deploying function with object storage sources")
+
+                deployOperation = CloudRepository.instance.createFunctionVersion(
+                    authData,
+                    spec,
+                    spec.objectStorageBucket!!,
+                    spec.objectStorageObject!!
+                )
+            }
+
+
+            val error = deployOperation.data.error
             if (error != null) steps.error(error.message)
+
 
             steps.next("Waiting for operation end")
 
-            val operationResult = operation.awaitEnd(project, authData)
+            val operationResult = deployOperation.awaitEnd(project, authData)
 
             when (val result = operationResult.result) {
                 is JustValue -> {
@@ -139,5 +188,21 @@ class FunctionDeployProcess(
             val function = CloudFunction.forUser(profile.resourceUser, spec.functionId ?: "").get()
             function?.update(project, false)
         }
+    }
+
+    private fun logSourceFiles(sourceFiles: List<String>, policy: SourceFolderPolicy) {
+        logger.println(
+            "\nSource Files: ${
+                "\n" + sourceFiles.joinToString("") { "- $it\n" }
+            }(Policy: ${policy.displayName})"
+        )
+    }
+
+    private fun checkSourceSize(archiveFile: File): Boolean {
+        return archiveFile.length() <= SOURCE_SIZE_LIMIT
+    }
+
+    companion object {
+        private const val SOURCE_SIZE_LIMIT: Long = 3670016
     }
 }
