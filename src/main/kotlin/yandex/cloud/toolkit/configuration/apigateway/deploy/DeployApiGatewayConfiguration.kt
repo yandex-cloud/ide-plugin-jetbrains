@@ -16,7 +16,7 @@ import yandex.cloud.toolkit.process.RunContentController
 import yandex.cloud.toolkit.util.logger
 
 class DeployApiGatewayConfiguration(name: String?, factory: ConfigurationFactory, project: Project) :
-    RunConfigurationMinimalBase<ApiGatewayDeploySpec>(name, factory, project) {
+    RunConfigurationMinimalBase<ApiGatewayDeploySpec>(name, factory, project), WithoutOwnBeforeRunSteps  {
 
     override fun clone() = DeployApiGatewayConfiguration(name, factory, project).apply {
         state.copyFrom(this@DeployApiGatewayConfiguration.state)

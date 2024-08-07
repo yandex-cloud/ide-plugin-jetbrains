@@ -20,11 +20,19 @@ class Restrictions<V>(val name: String) : Restriction<V> {
         restrictions.add(restriction)
     }
 
+    fun include(other: Restrictions<V>) {
+        restrictions.addAll(other.restrictions)
+    }
+
     override fun test(value: V): String? {
         for (restriction in restrictions) {
             return restriction.test(value) ?: continue
         }
         return null
+    }
+
+    fun rename(name: String): Restrictions<V> = Restrictions<V>(name).also {
+        it.include(this)
     }
 }
 
@@ -38,7 +46,6 @@ inline fun <V> Restrictions<V>.require(crossinline condition: (V) -> Boolean, cr
 inline fun <V> Restrictions<V>.requireNot(crossinline condition: (V) -> Boolean, crossinline message: () -> String) {
     addRestriction { if (condition(it)) message() else null }
 }
-
 
 fun <V> Restrictions<V>.check(restriction: Restriction<V>) {
     addRestriction(restriction)
@@ -71,6 +78,13 @@ fun Restrictions<String>.textIsNotEmpty() {
         if (it.isEmpty() || it.isBlank()) "can not be empty" else null
     }
 }
+
+fun Restrictions<String>.textHasNoSpaces() {
+    addRestriction {
+        if (it.any { c -> c.isWhitespace() }) "must not contain spaces" else null
+    }
+}
+
 
 fun Restrictions<String>.textPattern(regex: Regex) {
     addRestriction {

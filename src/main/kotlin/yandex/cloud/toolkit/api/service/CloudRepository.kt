@@ -6,6 +6,7 @@ import yandex.cloud.api.access.Access
 import yandex.cloud.api.iam.v1.RoleOuterClass
 import yandex.cloud.api.iam.v1.ServiceAccountOuterClass
 import yandex.cloud.api.logging.v1.LogEntryOuterClass
+import yandex.cloud.api.lockbox.v1.PayloadOuterClass
 import yandex.cloud.api.operation.OperationOuterClass
 import yandex.cloud.api.resourcemanager.v1.CloudOuterClass
 import yandex.cloud.api.resourcemanager.v1.FolderOuterClass
@@ -106,6 +107,12 @@ interface CloudRepository {
         functionId: String,
         tag: String
     ): CloudOperation
+
+    fun getLockboxSecret(
+        authData: CloudAuthData,
+        secretId: String,
+        versionId: String?
+    ): PayloadOuterClass.Payload
 
     fun getOperation(authData: CloudAuthData, operationId: String): Maybe<OperationOuterClass.Operation>
 

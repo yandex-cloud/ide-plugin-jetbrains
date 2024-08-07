@@ -85,7 +85,7 @@ class CloudFunctionLoader(val functionId: String) :
     DependentResourceLoader<CloudFunctionGroup, CloudFunction>(CloudFunctionGroup.Function) {
 
     override fun load(parent: CloudFunctionGroup, result: CloudDependencyLoadingResult) {
-        val authData = parent.user.authData ?: CloudFunctionVersionsLoader.unauthenticatedError()
+        val authData = parent.user.authData ?: unauthenticatedError()
         val function = CloudRepository.instance.getFunction(authData, functionId)
         result.put(parent, dependency, CloudFunction(function, parent))
     }

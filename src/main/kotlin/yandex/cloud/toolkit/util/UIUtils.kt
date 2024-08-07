@@ -10,7 +10,6 @@ import com.intellij.openapi.ui.LabeledComponent
 import com.intellij.openapi.util.Disposer
 import com.intellij.ui.*
 import com.intellij.ui.components.JBBox
-import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.fields.IntegerField
 import com.intellij.util.ui.GridBag
 import com.intellij.util.ui.UIUtil
@@ -69,6 +68,22 @@ fun <E> CollectionListModel<E>.setItems(items: List<E>) {
 fun <C : JComponent> C.withNoBorder(): C {
     border = null
     return this
+}
+
+fun JLabel.withIcon(icon: Icon) = this.apply {
+    setIcon(icon)
+}
+
+fun TitledSeparator.withIcon(icon: Icon) = this.apply {
+    label.icon = icon
+}
+
+fun Action.copyEnableStateOf(action: Action) {
+    action.addPropertyChangeListener { event ->
+        if (event.propertyName == "enabled") {
+            isEnabled = action.isEnabled
+        }
+    }
 }
 
 val <E> JList<E>.singleSelectedValue: E? get() = if (isSingleValueSelected) selectedValue else null
@@ -151,7 +166,7 @@ object YCUI {
             else -> EditorColorsManager.getInstance().schemeForCurrentUITheme
         }
 
-    fun separator(text: String, labelFor: JBLabel? = null): TitledSeparator =
+    fun separator(text: String, labelFor: JComponent? = null): TitledSeparator =
         SeparatorFactory.createSeparator(text, labelFor)
 
     inline fun hbox(block: JBBox.() -> Unit = {}) = JBBox(BoxLayout.X_AXIS).apply(block)

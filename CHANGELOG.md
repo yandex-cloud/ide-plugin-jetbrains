@@ -1,4 +1,11 @@
 # Changelog
+## [1.2.0]
+### Fixed
+- Fix function env variable key constraints
+- Remove unnecessary before launch block in run configurations
+### Added
+- Support of Lockbox secrets in functions
+- Function deploy through Object Storage
 
 ## [1.1.2]
 ### Fixed

@@ -14,5 +14,10 @@ fun Timer.scheduleDelayed(delay: Duration?, task: () -> Unit): TimerTask? {
     } else schedule(delay.toMillis()) { task() }
 }
 
-fun invokeLaterAt(component: Component, block: () -> Unit) =
-    invokeLater(ModalityState.stateForComponent(component), block)
+fun invokeLaterAt(component: Component?, block: () -> Unit) {
+    if (component == null) {
+        block()
+    } else {
+        invokeLater(ModalityState.stateForComponent(component), block)
+    }
+}
