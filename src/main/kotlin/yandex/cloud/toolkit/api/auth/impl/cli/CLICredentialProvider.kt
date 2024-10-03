@@ -22,6 +22,8 @@ class CLICredentialProvider(
         private val log = logger<CLICredentialProvider>()
     }
 
+    override fun close() {}
+
     override fun get(): IamToken {
         log.info("Token from CLI requested: $cliLocation --profile $profile")
 

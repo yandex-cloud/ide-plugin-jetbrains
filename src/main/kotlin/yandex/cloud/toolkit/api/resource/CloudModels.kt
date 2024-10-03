@@ -43,3 +43,7 @@ fun <R : CloudResource> List<R>.findById(id: String?): R? = when {
     id != null -> find { it.id == id }
     else -> null
 }
+
+enum class ResourceType(val id: String) {
+    SERVERLESS_FUNCTION("serverless.function")
+}

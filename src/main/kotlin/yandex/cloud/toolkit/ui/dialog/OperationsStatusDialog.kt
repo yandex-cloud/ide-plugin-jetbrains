@@ -94,7 +94,7 @@ class OperationsStatusDialog(
         override fun getRenderer(result: CloudOperationResult): TableCellRenderer =
             object : ColoredTableCellRenderer() {
                 override fun customizeCellRenderer(
-                    table: JTable?,
+                    table: JTable,
                     value: Any?,
                     selected: Boolean,
                     hasFocus: Boolean,

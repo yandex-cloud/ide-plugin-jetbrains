@@ -15,7 +15,9 @@ import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.impl.client.HttpClients
 import yandex.cloud.api.access.Access
 import yandex.cloud.api.iam.v1.ServiceAccountOuterClass
+import yandex.cloud.api.serverless.functions.v1.FunctionOuterClass
 import yandex.cloud.toolkit.api.auth.CloudAuthData
+import yandex.cloud.toolkit.api.resource.ResourceType
 import yandex.cloud.toolkit.api.resource.getOrLoad
 import yandex.cloud.toolkit.api.resource.impl.*
 import yandex.cloud.toolkit.api.resource.impl.model.*
@@ -308,19 +310,34 @@ class CloudOperationServiceImpl : CloudOperationService {
 
     override fun fetchFunctionLogs(
         authData: CloudAuthData,
-        logGroupId: String,
-        streamName: String,
+        version: CloudFunctionVersion,
         fromSecondsIn: Long,
         toSecondsEx: Long,
         pointer: RemoteListPointer
     ): LazyTask<RemoteList<LogLine>> =
         tryLazy("Reading logs...") {
+            val logGroupId = getLogGroupId(authData, version)
+            val filter = "(source=user or source=system) and version_id=${version.id}"
             CloudRepository.instance.readLogs(
-                authData, logGroupId, streamName, fromSecondsIn, toSecondsEx - 1, pointer
+                authData, logGroupId, listOf(ResourceType.SERVERLESS_FUNCTION), listOf(version.function.id), filter, fromSecondsIn, toSecondsEx - 1, pointer
             ).map(::LogLine)
         } onError {
-            "Failed to read function '$streamName' logs: ${it.message}"
+            "Failed to read function '${version.id}' logs: ${it.message}"
         }
+
+    private fun getLogGroupId(authData: CloudAuthData, version: CloudFunctionVersion): String {
+        val destinationCase = version.data.logOptions.destinationCase!!
+
+        if (destinationCase == FunctionOuterClass.LogOptions.DestinationCase.LOG_GROUP_ID) {
+            return version.data.logGroupId
+        }
+        val folderId = if (destinationCase == FunctionOuterClass.LogOptions.DestinationCase.FOLDER_ID) {
+            version.function.data.folderId
+        } else {
+            version.function.group.folder.id
+        }
+        return CloudRepository.instance.getDefaultLogGroup(authData, folderId)
+    }
 
     override fun setFunctionVersionTags(
         project: Project,

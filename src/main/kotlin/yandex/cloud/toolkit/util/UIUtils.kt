@@ -154,8 +154,8 @@ object YCUI {
     fun separator(text: String, labelFor: JBLabel? = null): TitledSeparator =
         SeparatorFactory.createSeparator(text, labelFor)
 
-    inline fun hbox(block: YCBox.() -> Unit = {}) = YCBox(BoxLayout.X_AXIS).apply(block)
-    inline fun vbox(block: YCBox.() -> Unit = {}) = YCBox(BoxLayout.Y_AXIS).apply(block)
+    inline fun hbox(block: JBBox.() -> Unit = {}) = JBBox(BoxLayout.X_AXIS).apply(block)
+    inline fun vbox(block: JBBox.() -> Unit = {}) = JBBox(BoxLayout.Y_AXIS).apply(block)
 
     inline fun gridPanel(block: YCPanel.() -> Unit = {}): YCPanel = YCPanel(GridBagLayout()).apply(block)
 
@@ -195,12 +195,5 @@ open class YCPanel(layout: LayoutManager? = null) : JPanel(layout) {
 
     infix fun Component.addAs(constraints: Any) {
         add(this@addAs, constraints)
-    }
-}
-
-open class YCBox(axis: Int) : JBBox(axis) {
-
-    operator fun Component.unaryPlus() {
-        add(this@unaryPlus)
     }
 }

@@ -5,7 +5,7 @@ import com.intellij.openapi.components.ServiceManager
 import yandex.cloud.api.access.Access
 import yandex.cloud.api.iam.v1.RoleOuterClass
 import yandex.cloud.api.iam.v1.ServiceAccountOuterClass
-import yandex.cloud.api.logs.v1.LogEventOuterClass
+import yandex.cloud.api.logging.v1.LogEntryOuterClass
 import yandex.cloud.api.operation.OperationOuterClass
 import yandex.cloud.api.resourcemanager.v1.CloudOuterClass
 import yandex.cloud.api.resourcemanager.v1.FolderOuterClass
@@ -15,6 +15,7 @@ import yandex.cloud.api.serverless.triggers.v1.TriggerOuterClass
 import yandex.cloud.api.vpc.v1.NetworkOuterClass
 import yandex.cloud.api.vpc.v1.SubnetOuterClass
 import yandex.cloud.toolkit.api.auth.CloudAuthData
+import yandex.cloud.toolkit.api.resource.ResourceType
 import yandex.cloud.toolkit.api.resource.impl.model.*
 import yandex.cloud.toolkit.configuration.function.deploy.FunctionDeploySpec
 import yandex.cloud.toolkit.util.Maybe
@@ -109,11 +110,15 @@ interface CloudRepository {
     fun readLogs(
         authData: CloudAuthData,
         logGroupId: String,
-        streamName: String,
+        resourceTypes: List<ResourceType>?,
+        resourceIds: List<String>?,
+        filter: String?,
         fromSeconds: Long,
         toSeconds: Long,
         pointer: RemoteListPointer
-    ): RemoteList<LogEventOuterClass.LogEvent>
+    ): RemoteList<LogEntryOuterClass.LogEntry>
+
+    fun getDefaultLogGroup(authData: CloudAuthData, folderId: String): String
 
     fun setFunctionTag(authData: CloudAuthData, versionId: String, tag: String): CloudOperation
 

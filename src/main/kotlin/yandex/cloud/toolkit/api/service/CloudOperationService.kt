@@ -58,8 +58,7 @@ interface CloudOperationService {
      */
     fun fetchFunctionLogs(
         authData: CloudAuthData,
-        logGroupId: String,
-        streamName: String,
+        version: CloudFunctionVersion,
         fromSecondsIn: Long,
         toSecondsEx: Long,
         pointer: RemoteListPointer

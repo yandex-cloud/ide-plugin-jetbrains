@@ -3,17 +3,12 @@ buildscript {
         gradlePluginPortal()
         mavenCentral()
     }
-    dependencies {
-        classpath 'org.kordamp.gradle:markdown-gradle-plugin:2.2.0'
-    }
 }
 
 plugins {
-    id 'org.jetbrains.intellij' version '0.5.0'
-    id 'org.jetbrains.kotlin.jvm' version '1.4.10'
-    id 'com.github.johnrengelman.shadow' version '6.1.0'
-    id 'com.google.protobuf' version '0.8.14'
-    id 'org.kordamp.gradle.markdown' version '2.2.0'
+    id 'org.jetbrains.intellij' version '1.15.0'
+    id 'org.jetbrains.kotlin.jvm' version '1.8.10'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
 group 'ru.yandex'
@@ -33,11 +28,12 @@ dependencies {
     implementation "com.yandex.cloud:java-sdk-auth:$YC_SDK_VERSION"
 
     implementation "com.google.protobuf:protobuf-java:$PROTOBUF_VERSION"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 }
 
 compileKotlin {
     kotlinOptions {
-        jvmTarget = '1.8'
+        jvmTarget = '17'
 
         freeCompilerArgs += [
                 // This flag is required due to the current implementation using
@@ -57,16 +53,6 @@ shadowJar {
     mergeServiceFiles()
 }
 
-protobuf {
-    protoc { artifact = "com.google.protobuf:protoc:$PROTOBUF_VERSION" }
-    plugins {
-        grpc { artifact = "io.grpc:protoc-gen-grpc-java:$GRPC_VERSION" }
-    }
-    generateProtoTasks {
-        all()*.plugins { grpc {} }
-    }
-}
-
 sourceSets {
     main {
         java {
@@ -78,25 +64,31 @@ sourceSets {
 
 // See https://github.com/JetBrains/gradle-intellij-plugin/
 intellij {
-    version ideaVersion
+    version = ideaVersion
 }
 
 patchPluginXml {
-    sinceBuild minIDEVersion
-    untilBuild null
+    sinceBuild = minIDEVersion
+    untilBuild = null
 
     copy {
         from changesFile
         into "build/changelog"
     }
 
-    markdownToHtml {
-        sourceDir file("build/changelog")
-        outputDir file("build/changelog")
-    }.runTask()
+//    markdownToHtml {
+//        sourceDir file("build/changelog")
+//        outputDir file("build/changelog")
+//    }.runTask()
+//
+//    pluginDescription = file(descriptionFile).text
+//    changeNotes = file("build/changelog/CHANGELOG.html").text
+}
 
-    pluginDescription(file(descriptionFile).text)
-    changeNotes(file("build/changelog/CHANGELOG.html").text)
+configurations.all {
+    exclude group:"io.grpc", module: "grpc-api"
+    exclude group:"io.grpc", module: "grpc-core"
+    exclude group:"io.grpc", module: "grpc-netty-shaded"
 }
 
 task printVersion {
