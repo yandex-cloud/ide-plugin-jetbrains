@@ -6,9 +6,18 @@ buildscript {
 }
 
 plugins {
-    id 'org.jetbrains.intellij' version '1.15.0'
-    id 'org.jetbrains.kotlin.jvm' version '1.8.10'
+    id 'org.jetbrains.intellij.platform' version "$pluginVersion"
+    id 'org.jetbrains.kotlin.jvm' version '2.1.10'
     id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+repositories {
+    intellijPlatform {
+        defaultRepositories()
+    }
+    maven {
+        url = 'https://maven.atlassian.com/content/repositories/atlassian-public/'
+    }
 }
 
 group 'ru.yandex'
@@ -28,19 +37,18 @@ dependencies {
     implementation "com.yandex.cloud:java-sdk-auth:$YC_SDK_VERSION"
 
     implementation "com.google.protobuf:protobuf-java:$PROTOBUF_VERSION"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    implementation 'com.michaelbaranov:microba:0.4.4.3'
+
+    intellijPlatform {
+        intellijIdeaCommunity ideaVersion
+        bundledPlugin 'com.intellij.modules.json'
+
+    }
 }
 
 compileKotlin {
     kotlinOptions {
         jvmTarget = '17'
-
-        freeCompilerArgs += [
-                // This flag is required due to the current implementation using
-                // the coroutine builder [CoroutineScope.actor]. This can be removed
-                // once the coroutines stdlib is updated with a suitable replacement
-                "-Xuse-experimental=kotlinx.coroutines.ObsoleteCoroutinesApi"
-        ]
     }
 }
 
@@ -62,14 +70,9 @@ sourceSets {
     }
 }
 
-// See https://github.com/JetBrains/gradle-intellij-plugin/
-intellij {
-    version = ideaVersion
-}
-
 patchPluginXml {
     sinceBuild = minIDEVersion
-    untilBuild = null
+    untilBuild = maxIDEVersion
 
     copy {
         from changesFile
@@ -83,12 +86,6 @@ patchPluginXml {
 //
 //    pluginDescription = file(descriptionFile).text
 //    changeNotes = file("build/changelog/CHANGELOG.html").text
-}
-
-configurations.all {
-    exclude group:"io.grpc", module: "grpc-api"
-    exclude group:"io.grpc", module: "grpc-core"
-    exclude group:"io.grpc", module: "grpc-netty-shaded"
 }
 
 task printVersion {

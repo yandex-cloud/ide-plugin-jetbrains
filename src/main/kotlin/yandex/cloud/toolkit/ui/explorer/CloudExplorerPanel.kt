@@ -129,7 +129,10 @@ class CloudExplorerPanel(val explorer: CloudExplorer) : SimpleToolWindowPanel(tr
     }
 
     private fun setupToolbar() {
-        toolbar = ActionManager.getInstance().createActionToolbar(ActionPlaces.TOOLBAR, toolbarActions, true).component
+        toolbar = ActionManager.getInstance().createActionToolbar(ActionPlaces.TOOLBAR, toolbarActions, true).
+            apply {
+                targetComponent = this@CloudExplorerPanel
+            }.component
         updateToolbar()
     }
 

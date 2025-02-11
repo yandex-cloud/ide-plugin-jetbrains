@@ -6,11 +6,11 @@ import com.intellij.icons.AllIcons
 import com.intellij.json.JsonLanguage
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.editor.SpellCheckingEditorCustomizationProvider
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
 import com.intellij.openapi.util.Disposer
 import com.intellij.psi.PsiDocumentManager
-import com.intellij.spellchecker.ui.SpellCheckingEditorCustomization
 import com.intellij.ui.*
 import com.intellij.ui.components.JBTextField
 import com.intellij.util.ui.TimerUtil
@@ -181,7 +181,7 @@ class RunFunctionDialog(
             listOf(
                 colorEditorCustomization(),
                 ErrorStripeEditorCustomization.DISABLED,
-                SpellCheckingEditorCustomization.getInstance(false),
+                SpellCheckingEditorCustomizationProvider.getInstance().disabledCustomization,
                 EditorCustomization {
                     it.isViewer = viewer
                     it.settings.apply {
