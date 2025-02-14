@@ -81,14 +81,13 @@ intellijPlatform {
     pluginConfiguration {
         description = file(descriptionFile).text
 
-        changeNotes = provider {
-            def item = project.changelog.getUnreleased()
-                    ?.withHeader(false)
-                    ?.withEmptySections(false)
-                    changelog.renderItem(
-                            item,
-                            Changelog.OutputType.HTML
-                    )
+        changeNotes = project.changelog.with {
+            renderItem(
+                    (getOrNull(pluginVersion) ?: getUnreleased())
+                            .withHeader(false)
+                            .withEmptySections(false),
+                    Changelog.OutputType.HTML
+            )
         }
     }
 }
