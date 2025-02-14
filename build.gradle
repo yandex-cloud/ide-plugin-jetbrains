@@ -1,3 +1,5 @@
+import org.jetbrains.changelog.Changelog
+
 buildscript {
     repositories {
         gradlePluginPortal()
@@ -9,7 +11,7 @@ plugins {
     id 'org.jetbrains.intellij.platform' version '2.2.1'
     id 'org.jetbrains.kotlin.jvm' version '2.1.10'
     id 'com.gradleup.shadow' version '8.3.6'
-
+    id 'org.jetbrains.changelog' version '2.2.1'
 }
 
 repositories {
@@ -75,6 +77,22 @@ sourceSets {
     }
 }
 
+intellijPlatform {
+    pluginConfiguration {
+        description = file(descriptionFile).text
+
+        changeNotes = provider {
+            def item = project.changelog.getUnreleased()
+                    ?.withHeader(false)
+                    ?.withEmptySections(false)
+                    changelog.renderItem(
+                            item,
+                            Changelog.OutputType.HTML
+                    )
+        }
+    }
+}
+
 patchPluginXml {
     sinceBuild = minIDEVersion
     untilBuild = maxIDEVersion
@@ -83,14 +101,6 @@ patchPluginXml {
         from changesFile
         into "build/changelog"
     }
-
-//    markdownToHtml {
-//        sourceDir file("build/changelog")
-//        outputDir file("build/changelog")
-//    }.runTask()
-//
-//    pluginDescription = file(descriptionFile).text
-//    changeNotes = file("build/changelog/CHANGELOG.html").text
 }
 
 task printVersion {

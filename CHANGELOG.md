@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+### Changed
+- Support IDE versions since 243
+- Remove version "until" constraint
+- Migrate to IntelliJ Platform Gradle Plugin 2.0
+
 ## [1.1.2]
 ### Fixed
 - Fix Yandex.Cloud CLI binary detection
