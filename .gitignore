@@ -1,3 +1,5 @@
 .gradle
+.kotlin
 .idea
+.intellijPlatform
 build

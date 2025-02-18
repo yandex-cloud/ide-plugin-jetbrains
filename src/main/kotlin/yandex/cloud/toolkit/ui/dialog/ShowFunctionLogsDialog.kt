@@ -29,6 +29,7 @@ import javax.swing.DefaultComboBoxModel
 import javax.swing.JComponent
 import javax.swing.JList
 import javax.swing.ListSelectionModel
+import javax.swing.UIManager
 
 class ShowFunctionLogsDialog(
     project: Project,
@@ -54,19 +55,31 @@ class ShowFunctionLogsDialog(
         )
     }
 
-    private val sinceTimeField = DatePicker(
-        Date.from(Instant.now() - Duration.ofHours(1)),
-        DATE_FORMAT
-    )
+    private val sinceTimeField: DatePicker
 
-    private val untilTimeField = DatePicker(
-        Date.from(Instant.now() + Duration.ofHours(1)),
-        DATE_FORMAT
-    )
+    private val untilTimeField: DatePicker
 
     private val pageSizeBox = ComboBox<Int>()
 
     init {
+        val previousLF = UIManager.getLookAndFeel()
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+
+        sinceTimeField = DatePicker(
+            Date.from(Instant.now() - Duration.ofHours(1)),
+            DATE_FORMAT
+        )
+        untilTimeField = DatePicker(
+            Date.from(Instant.now() + Duration.ofHours(1)),
+            DATE_FORMAT
+        )
+
+        UIManager.setLookAndFeel(previousLF)
+
         myOKAction.text = "Load Logs"
         myOKAction.icon = AllIcons.Vcs.History
         myCancelAction.text = "Close"

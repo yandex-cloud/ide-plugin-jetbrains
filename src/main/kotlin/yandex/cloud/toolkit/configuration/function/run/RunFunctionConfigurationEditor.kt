@@ -1,9 +1,9 @@
 package yandex.cloud.toolkit.configuration.function.run
 
 import com.intellij.json.JsonLanguage
+import com.intellij.openapi.editor.SpellCheckingEditorCustomizationProvider
 import com.intellij.openapi.options.SettingsEditor
 import com.intellij.openapi.project.Project
-import com.intellij.spellchecker.ui.SpellCheckingEditorCustomization
 import com.intellij.ui.EditorCustomization
 import com.intellij.ui.EditorTextFieldProvider
 import com.intellij.ui.ErrorStripeEditorCustomization
@@ -34,7 +34,7 @@ class RunFunctionConfigurationEditor(
         listOf(
             colorEditorCustomization(),
             ErrorStripeEditorCustomization.DISABLED,
-            SpellCheckingEditorCustomization.getInstance(false),
+            SpellCheckingEditorCustomizationProvider.getInstance().disabledCustomization,
             EditorCustomization {
                 it.isViewer = false
                 it.settings.apply {

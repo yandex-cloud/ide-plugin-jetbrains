@@ -44,6 +44,9 @@ class FunctionLogsTrackingPanel<C : ProcessController>(
 
     val actions = DefaultActionGroup()
     val toolbar = ActionManager.getInstance().createActionToolbar("FunctionLogsTrackingPanel", actions, false)
+        .apply {
+            targetComponent = this@FunctionLogsTrackingPanel
+        }
 
     init {
         toolbar.component addAs BorderLayout.WEST
@@ -81,7 +84,7 @@ class FunctionLogsTrackingPanel<C : ProcessController>(
 
     override fun onLogsFetched(event: FunctionLogsFetchedEvent) {
         invokeLaterAt(console) {
-            val doc = console.editor.document
+            val doc = console.editor?.document ?: throw RuntimeException("Can't edit function logs panel")
             DocumentUtil.writeInRunUndoTransparentAction {
                 DiffUtil.applyModification(doc, event.startLine, event.endLine, event.lines)
             }

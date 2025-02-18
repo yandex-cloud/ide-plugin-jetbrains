@@ -6,7 +6,7 @@ enum class SourceFolderPolicy(val displayName: String) {
     EXTRACT("Extract Top Level Folders"),
     FLATTEN("Flatten File Tree");
 
-    val id: String get() = name.toLowerCase()
+    val id: String get() = name.lowercase()
 
     companion object {
 
