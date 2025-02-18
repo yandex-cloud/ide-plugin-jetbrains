@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [2.0.0]
 ### Changed
 - Support IDE versions since 243
 - Remove version "until" constraint
